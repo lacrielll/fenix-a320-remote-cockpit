@@ -1,0 +1,92 @@
+@font-face{font-family:'Airbus FCU';src:url('/fonts/AirbusFCU.ttf') format('truetype');font-display:block}
+@font-face{font-family:'FCU Poppins';src:url('/fonts/Poppins-SemiBold.ttf') format('truetype');font-weight:600;font-display:block}
+@font-face{font-family:'FCU Montserrat';src:url('/fonts/Montserrat.ttf') format('truetype');font-weight:100 900;font-display:block}
+
+/*
+ * Physical reference grid: FlyByWire A32NX LOD01 central FCU face.
+ * Model bounds: x [-0.140992847, 0.140993042], panel-down
+ * [-4.533920655, -4.433472419]. All control centers below are the
+ * normalized model coordinates, not independently eyeballed offsets.
+ */
+.real-fcu{container-type:inline-size;position:relative;width:100%;aspect-ratio:2.80728/1;overflow:hidden;border:1px solid #73858b;border-radius:2px;background:linear-gradient(112deg,#40545d,#536973 47%,#3b4e57);box-shadow:inset 0 .22cqw .35cqw #a5b0b277,inset 0 -.45cqw .8cqw #1d2b31aa,0 .45cqw .8cqw #000b;color:#f8ffdf;font-family:'FCU Poppins',sans-serif}
+.rf-surface-noise{position:absolute;inset:0;pointer-events:none;opacity:.34;background:radial-gradient(circle at 17% 23%,#dce3e225 0 .055cqw,transparent .095cqw),radial-gradient(circle at 72% 68%,#07121626 0 .05cqw,transparent .09cqw),radial-gradient(circle at 42% 77%,#edf1eb16 0 .035cqw,transparent .075cqw),repeating-linear-gradient(104deg,transparent 0 1.3cqw,#d8dfdd10 1.34cqw,transparent 1.43cqw),repeating-linear-gradient(7deg,transparent 0 3.8cqw,#14252b0b 3.84cqw,transparent 3.91cqw);mix-blend-mode:soft-light}
+.rf-surface-noise:after{content:'';position:absolute;inset:0;opacity:.32;background:repeating-linear-gradient(97deg,transparent 0 4.1cqw,#e7ece714 4.13cqw,transparent 4.19cqw),repeating-linear-gradient(173deg,transparent 0 6.7cqw,#17262b12 6.73cqw,transparent 6.82cqw)}
+.rf-control-wear{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:.72;mix-blend-mode:soft-light;background:radial-gradient(circle at 14.643% 57.074%,transparent 0 4.45cqw,#e5ebe522 4.58cqw,#18282e28 4.78cqw,transparent 5.18cqw),radial-gradient(circle at 30.833% 57.531%,transparent 0 4.45cqw,#e5ebe520 4.57cqw,#17272d25 4.8cqw,transparent 5.2cqw),radial-gradient(circle at 67.966% 57.75%,transparent 0 4.45cqw,#e8ede625 4.58cqw,#17272d2b 4.81cqw,transparent 5.22cqw),radial-gradient(circle at 88.244% 58.327%,transparent 0 4.45cqw,#e3e9e323 4.59cqw,#16272c27 4.82cqw,transparent 5.2cqw),radial-gradient(ellipse .75cqw .13cqw at 11.2% 68%,#edf1eb40,transparent 72%),radial-gradient(ellipse .55cqw .1cqw at 34.1% 47%,#15272d45,transparent 75%),radial-gradient(ellipse .82cqw .12cqw at 64.2% 68%,#edf1eb3a,transparent 72%),radial-gradient(ellipse .65cqw .11cqw at 91.6% 46%,#13252b42,transparent 74%)}
+
+.rf-screw{position:absolute;z-index:12;width:1.447130318cqw;height:1.447130318cqw;border-radius:50%;background:radial-gradient(circle at 35% 32%,#d4d7d2,#7a8281 43%,#293336 70%);border:.072cqw solid #263237;box-shadow:0 .09cqw .15cqw #142126}
+.rf-screw:after{content:'';position:absolute;left:14%;right:14%;top:46%;height:.084cqw;background:#283235;transform:rotate(-52deg)}
+.rf-screw-tl{left:1.25%;top:3.90625%}.rf-screw-tr{right:1.25%;top:3.90625%}.rf-screw-bl{left:1.25%;bottom:3%}.rf-screw-br{right:1.25%;bottom:3%}.rf-screw-b1{left:22%;bottom:2.7%}.rf-screw-b2{right:18%;bottom:2.7%}
+
+/* SCREEN_AUTOPILOT central connected component from the FBW glTF. */
+.rf-glass{position:absolute;z-index:2;left:8.341%;top:8.659%;width:83.317%;height:17.608%;overflow:hidden;border:.16cqw solid #233238;border-bottom-color:#859499;border-radius:.55cqw;background:#020403;box-shadow:inset 0 0 1.1cqw #000,0 .16cqw .2cqw #9aa6a766}
+.rf-display-svg{display:block;width:100%;height:100%;overflow:visible;--fcu-amber:hsl(36 100% 45%);--fcu-dark:hsl(36 72% 10%)}
+.rf-display-labels{font:600 56px 'FCU Poppins',sans-serif;fill:var(--fcu-amber)}
+.rf-display-labels text{transform-box:fill-box;transform-origin:center;transform:scaleX(.9)}
+.rf-display-labels .inactive{fill:var(--fcu-dark);opacity:.9}.rf-display-labels .active{fill:var(--fcu-amber)}
+.rf-display-values{font:110px 'Airbus FCU',monospace;fill:var(--fcu-amber)}
+.rf-display-values text{transform-box:fill-box;transform-origin:left bottom;transform:scale(.9,1.24)}
+.rf-display-ghosts{fill:var(--fcu-dark);opacity:.9}
+.rf-display-values circle{fill:var(--fcu-dark);opacity:.9}.rf-display-values circle.visible{fill:var(--fcu-amber);opacity:1}
+.rf-lvl-bracket{fill:none;stroke:var(--fcu-amber);stroke-width:7;stroke-linecap:square}
+
+/* The model has only the two lower dividers. ALT and V/S share one block. */
+.rf-divider{position:absolute;z-index:2;top:34%;bottom:7%;width:.18cqw;background:#d8ddd4;box-shadow:.06cqw 0 .08cqw #24363b66}
+.rf-divider-1{left:41.1%}.rf-divider-2{left:59.8%}
+
+.rf-control-label{position:absolute;z-index:7;color:#f8ffdf;font:700 .98cqw/1.05 'FCU Montserrat',sans-serif;text-align:center;white-space:nowrap;pointer-events:none}
+.rf-label-spd-mach{left:4.516%;top:51.2%;transform:translateX(-50%)}
+.rf-label-metric-alt{left:78.138%;top:51.2%;transform:translateX(-50%)}
+.rf-label-hdg-trk,.rf-label-vs-fpa{top:43.09%;transform:translate(-50%,-50%)}
+.rf-label-hdg-trk{left:45.15%}.rf-label-vs-fpa{left:54.85%}
+.rf-label-level-off{left:92.55%;top:58.327%;width:5.4%;text-align:center;transform:translateY(-50%)}
+
+/* Controls: model center positions in percentages of the common face grid. */
+.rf-switch-button{position:absolute;z-index:8;width:4.725cqw;aspect-ratio:1;padding:0;border:0;border-radius:50%;overflow:hidden;background:radial-gradient(circle,#111 0 38%,transparent 39%);cursor:pointer;transform:translate(-50%,-50%)}
+.rf-switch-button img{display:block;width:100%;height:100%;pointer-events:none;user-select:none}
+.rf-switch-button-outer{position:absolute;inset:0;-webkit-mask-image:radial-gradient(circle at center,transparent 0 38.5%,#000 39.5%);mask-image:radial-gradient(circle at center,transparent 0 38.5%,#000 39.5%)}
+.rf-switch-button-inner{position:absolute;inset:0;display:block;clip-path:circle(39% at 50% 50%);transition:transform 70ms ease-out,filter 70ms ease-out;transform-origin:center}
+.rf-switch-button:active .rf-switch-button-inner{transform:scale(.91);filter:brightness(.72)}
+.rf-switch-spd-mach{left:4.516%;top:43.09%}
+.rf-switch-hdg-vs{left:50.037%;top:43.09%}
+.rf-switch-metric-alt{left:78.138%;top:43.09%}
+
+.rf-knob{position:absolute;z-index:5;width:12cqw;height:13.8cqw;transform:translate(-50%,-4.6cqw)}
+.rf-knob-speed{left:14.643%;top:57.074%}.rf-knob-heading{left:30.833%;top:57.531%}.rf-knob-altitude{left:67.966%;top:57.75%}.rf-knob-vertical{left:88.244%;top:58.327%}
+
+.rf-heading-assets,.rf-standard-assets{position:absolute;left:50%;top:0;width:9.2cqw;height:9.2cqw;transform:translateX(-50%);pointer-events:none}
+.rf-heading-assets img,.rf-standard-assets img{position:absolute;left:50%;top:50%;display:block;transform-origin:50% 50%;user-select:none}
+.rf-heading-base-asset,.rf-standard-base-asset{width:9.2cqw;height:9.2cqw;transform:translate(-50%,-50%)}
+.rf-heading-knob-shadow{position:absolute;left:50%;top:50%;display:block;width:8.85cqw;height:8.85cqw;transform:translate(-50%,-50%) scale(var(--rf-axial-scale,1));filter:drop-shadow(0 var(--rf-axial-shadow-y,.22cqw) var(--rf-axial-shadow-blur,.2cqw) #17262c88);transition:transform 110ms ease-out,filter 110ms ease-out}
+.rf-heading-knob-shadow .rf-heading-knob-asset{position:static;display:block;width:100%;height:100%;transform:rotate(var(--rf-rotation));filter:none}
+.rf-standard-knob-shadow{position:absolute;left:50%;top:50%;display:block;width:5.56cqw;height:5.56cqw;transform:translate(-50%,-50%) scale(var(--rf-axial-scale,1));filter:drop-shadow(0 var(--rf-axial-shadow-y,.22cqw) var(--rf-axial-shadow-blur,.2cqw) #17262c88);transition:transform 110ms ease-out,filter 110ms ease-out}
+.rf-standard-knob-shadow .rf-standard-knob-asset{position:static;display:block;width:100%;height:100%;transform:rotate(var(--rf-rotation));filter:none}
+
+.rf-alt-selector{position:absolute;z-index:7;left:calc(50% - 4.6cqw);top:-1.19059cqw;width:9.2cqw;height:10.39059cqw;padding:0;border:0;background:transparent;cursor:pointer}
+.rf-alt-selector-frame{position:absolute;z-index:2;inset:0;display:block;width:100%;height:100%;pointer-events:none;user-select:none}
+.rf-alt-selector-rotor{position:absolute;z-index:1;left:.10824cqw;top:1.29882cqw;display:block;width:8.98353cqw;height:8.98353cqw;transform:rotate(-30deg);transform-origin:50% 50%;transition:transform 380ms cubic-bezier(.22,.78,.2,1);pointer-events:none;user-select:none}
+.rf-alt-selector.at-1000 .rf-alt-selector-rotor{transform:rotate(30deg)}
+.rf-altitude-knob-asset{position:absolute;z-index:8;left:50%;top:4.6cqw;width:8.85cqw;height:8.85cqw;transform:translate(-50%,-50%) scale(var(--rf-axial-scale,1));filter:drop-shadow(0 var(--rf-axial-shadow-y,.25cqw) var(--rf-axial-shadow-blur,.22cqw) #17262c99);transition:transform 110ms ease-out,filter 110ms ease-out;pointer-events:none}
+.rf-altitude-knob-asset img{display:block;width:100%;height:100%;transform:rotate(var(--rf-rotation));transform-origin:50% 50%;filter:none;user-select:none}
+.rf-knob.is-pushing{--rf-axial-scale:.94;--rf-axial-shadow-y:.08cqw;--rf-axial-shadow-blur:.08cqw}
+.rf-knob.is-pulling{--rf-axial-scale:1.06;--rf-axial-shadow-y:.38cqw;--rf-axial-shadow-blur:.32cqw}
+
+/* V/S is two intentionally overlapping assets: 170x170 back + 120x221 UP/DN. */
+.rf-vs-assets{overflow:visible}
+.rf-vs-assets>.rf-standard-base-asset{z-index:1}
+.rf-vs-updn-asset{left:-.974cqw!important;top:-1.38cqw!important;z-index:2;width:6.494cqw;height:11.958cqw;transform:none!important}
+.rf-vs-knob-mount{position:absolute;inset:0;z-index:3;display:block;width:100%;height:100%;pointer-events:none}
+.rf-vs-knob-mount .rf-standard-knob-shadow{left:50%;top:50%}
+
+.rf-turn-hit{position:absolute;z-index:9;top:0;width:2.55cqw;height:9.2cqw;border:0;background:transparent;opacity:0;cursor:ew-resize;touch-action:manipulation}
+.rf-turn-left{left:1.375cqw}.rf-turn-right{right:1.375cqw}
+.rf-axial-actions{position:absolute;z-index:10;left:50%;top:1.6cqw;width:4.15cqw;height:5.45cqw;transform:translateX(-50%);overflow:hidden;border-radius:45%}
+.rf-axial{position:absolute;left:0;width:100%;height:50%;padding:0;border:0;background:transparent}
+.rf-push{top:0;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 20V5M6 11l6-6 6 6' fill='none' stroke='%23000' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 20V5M6 11l6-6 6 6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 12 12,n-resize}.rf-pull{bottom:0;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4v15M6 13l6 6 6-6' fill='none' stroke='%23000' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 4v15M6 13l6 6 6-6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 12 12,s-resize}
+
+.rf-korry{position:absolute;z-index:8;width:6.127cqw;height:auto;padding:0;border:0;background:transparent;color:#eee9d9;cursor:pointer;transform:translate(-50%,-50%)}
+.rf-korry.has-art{aspect-ratio:var(--rf-korry-aspect);border-radius:.24cqw;overflow:hidden;box-shadow:none}
+.rf-loc,.rf-exped,.rf-appr{width:6.0113cqw;height:4.2309cqw;aspect-ratio:auto!important}
+.rf-korry-face{position:absolute;inset:0;display:block;width:100%;height:100%;transition:opacity 120ms ease-out,transform 70ms ease-out,filter 70ms ease-out;pointer-events:none;user-select:none}.rf-korry-face-off{opacity:1}.rf-korry-face-on{opacity:0}.rf-korry.has-art.is-active .rf-korry-face-off{opacity:0}.rf-korry.has-art.is-active .rf-korry-face-on{opacity:1}.rf-korry.has-art:active .rf-korry-face{transform:scale(.965);filter:brightness(.78)}.rf-korry.has-art:active{box-shadow:none}
+.rf-ap1{left:45.61%;top:60.353%}.rf-ap2{left:54.61%;top:60.353%}.rf-athr{left:49.96%;top:85.533%}.rf-loc{left:32.473%;top:89.081%}.rf-exped{left:67.527%;top:89.048%}.rf-appr{left:87.966%;top:89.028%}
+
+@media(max-width:1250px){.real-fcu{min-width:1120px}}

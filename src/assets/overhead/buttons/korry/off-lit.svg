@@ -1,0 +1,16 @@
+<svg width="86" height="86" viewBox="0 0 86 86" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="off-glow" x="-20%" y="-35%" width="140%" height="170%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="2.21" result="blur"/>
+      <feFlood flood-color="#C8C8C8" flood-opacity="0.3"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect x="0.5" y="0.5" width="85" height="85" rx="6.5" fill="#212121" stroke="#B9B9AD"/>
+  <rect x="5" y="5" width="76" height="78" rx="6" fill="#2D2D2D"/>
+  <mask id="lower-zone-inside" fill="white">
+    <rect x="9" y="44" width="68" height="31" rx="1"/>
+  </mask>
+  <rect x="9" y="44" width="68" height="31" rx="1" stroke="#C8C8C8" stroke-width="4" mask="url(#lower-zone-inside)" filter="url(#off-glow)"/>
+</svg>

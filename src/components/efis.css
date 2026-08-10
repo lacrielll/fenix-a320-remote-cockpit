@@ -1,0 +1,360 @@
+.real-efis {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 539 / 320;
+  overflow: hidden;
+  border: 1px solid #73858b;
+  border-radius: 54.174397032cqw 0 0 0 / 5.194805195cqw 0 0 0;
+  background: linear-gradient(112deg, #40545d, #536973 47%, #3b4e57);
+  box-shadow: inset 0 .22cqw .35cqw #a5b0b277, inset 0 -.45cqw .8cqw #1d2b31aa, 0 .45cqw .8cqw #000b;
+  color: #f4f4df;
+  font-family: 'FCU Montserrat', Montserrat, sans-serif;
+}
+
+/* The F/O unit uses the captain geometry reflected across the aircraft centerline.
+ * Direct controls are reflected back locally so legends and digits stay readable. */
+.real-efis.is-mirrored { transform:scaleX(-1); }
+.real-efis.is-mirrored > .re-screw { transform:translate(-50%,-50%) scaleX(-1); }
+.real-efis.is-mirrored > .re-baro-glass,
+.real-efis.is-mirrored > .re-button,
+.real-efis.is-mirrored > .re-baro-control,
+.real-efis.is-mirrored > .re-mode-control,
+.real-efis.is-mirrored > .re-range-control { transform:scaleX(-1); }
+.real-efis.is-mirrored > .re-nav-selector { transform:translate(-50%,-50%) scaleX(-1); }
+
+.re-surface-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .3;
+  background:
+    radial-gradient(circle at 18% 30%, #e8eeee24 0 .08cqw, transparent .14cqw),
+    radial-gradient(circle at 73% 64%, #101d202b 0 .07cqw, transparent .13cqw),
+    repeating-linear-gradient(104deg, transparent 0 1.4cqw, #e0e6e310 1.44cqw, transparent 1.52cqw);
+  mix-blend-mode: soft-light;
+}
+
+.re-screw {
+  position: absolute;
+  z-index: 8;
+  width: 2.41187384cqw;
+  height: 2.41187384cqw;
+  border: .12cqw solid #263237;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, #d4d7d2, #7a8281 43%, #293336 70%);
+  box-shadow: 0 .15cqw .25cqw #142126;
+  transform: translate(-50%, -50%);
+}
+
+.re-screw::after {
+  content: '';
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 46%;
+  height: .14cqw;
+  background: #283235;
+  transform: rotate(-48deg);
+}
+
+.re-screw-tl { left: 2.968460111cqw; top: 9.276437848cqw; }
+.re-screw-tr { left: 97.402597403cqw; top: 3.525046382cqw; }
+.re-screw-bl { left: 2.41187384cqw; top: 56.400742115cqw; }
+.re-screw-br { left: 96.846011132cqw; top: 56.400742115cqw; }
+
+.re-placeholder {
+  --placeholder-edge: #b6c4c8;
+  position: absolute;
+  z-index: 4;
+  left: var(--efis-x);
+  top: var(--efis-y);
+}
+
+.re-centered { transform: translate(-50%, -50%); }
+
+.re-button {
+  width: 10.018552876cqw;
+  height: 7.050092764cqw;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.re-button-face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: opacity 120ms ease-out, transform 70ms ease-out, filter 70ms ease-out;
+  pointer-events: none;
+  user-select: none;
+}
+.re-button-face-off { opacity: 1; }
+.re-button-face-on { opacity: 0; }
+.re-button.is-active .re-button-face-off { opacity: 0; }
+.re-button.is-active .re-button-face-on { opacity: 1; }
+.re-button:active .re-button-face { transform: scale(.965); filter: brightness(.78); }
+
+.re-baro-glass {
+  position: absolute;
+  z-index: 3;
+  left: 11.131725417cqw;
+  top: 14.842300557cqw;
+  width: 19.480519481cqw;
+  height: 9.647495362cqw;
+  overflow: hidden;
+  border: .16cqw solid #233238;
+  border-bottom-color: #859499;
+  border-radius: .65cqw;
+  background: #020403;
+  box-shadow: inset 0 0 1.1cqw #000, 0 .16cqw .2cqw #9aa6a766;
+}
+
+.re-display-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  --efis-amber: hsl(36 100% 45%);
+  --efis-dark: hsl(36 72% 10%);
+}
+
+.re-display-labels {
+  font: 600 60.7px 'FCU Poppins', sans-serif;
+  fill: var(--efis-amber);
+}
+
+.re-display-labels text {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scaleX(1.036);
+}
+
+.re-display-labels .inactive { fill: var(--efis-dark); opacity: .9; }
+.re-display-labels .active { fill: var(--efis-amber); }
+
+.re-display-values {
+  font: 110px 'Airbus FCU', monospace;
+  fill: var(--efis-amber);
+}
+
+.re-display-values text {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scaleY(1.34);
+}
+
+.re-display-values .re-display-ghost { fill: var(--efis-dark); opacity: .9; }
+.re-display-values .re-display-std { transform: scale(1.18, 1.34); }
+.re-baro-digit-row text { stroke:#020403; stroke-width:3px; stroke-linejoin:round; paint-order:fill stroke; }
+
+.re-baro-control {
+  position: absolute;
+  z-index: 5;
+  left: 12.532132257cqw;
+  top: 28.400426448cqw;
+  width: 15.010315399cqw;
+  height: 16.952409799cqw;
+}
+
+.re-baro-selector {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.re-baro-selector-frame {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.re-baro-selector-rotor {
+  position: absolute;
+  z-index: 1;
+  left: .176587612cqw;
+  top: 2.119051674cqw;
+  display: block;
+  width: 14.6567718cqw;
+  height: 14.6567718cqw;
+  transform: rotate(-30deg);
+  transform-origin: 50% 50%;
+  transition: transform 380ms cubic-bezier(.22, .78, .2, 1);
+  pointer-events: none;
+  user-select: none;
+}
+
+.re-baro-selector.is-hpa .re-baro-selector-rotor { transform: rotate(30deg); }
+
+.re-baro-handle-zone {
+  position: absolute;
+  z-index: 4;
+  left: 3.089302247cqw;
+  top: 5.032210802cqw;
+  width: 8.829380216cqw;
+  height: 8.829380216cqw;
+  touch-action: none;
+}
+
+.re-baro-handle-shadow {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform: scale(var(--re-baro-axial-scale, 1));
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 var(--re-baro-shadow-y, .28cqw) var(--re-baro-shadow-blur, .24cqw) #17262c99);
+  transition: transform 110ms ease-out, filter 110ms ease-out;
+  pointer-events: none;
+}
+
+.re-baro-handle {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(var(--re-baro-rotation));
+  transform-origin: 50% 50%;
+  user-select: none;
+}
+
+.re-baro-turn {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  width: 27%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  cursor: ew-resize;
+}
+
+.re-baro-turn-left { left: 0; }
+.re-baro-turn-right { right: 0; }
+
+.re-baro-axial-actions { position:absolute; z-index:6; left:24%; top:7%; width:52%; height:86%; overflow:hidden; border-radius:44%; }
+.re-baro-axial { position:absolute; left:0; width:100%; height:50%; padding:0; border:0; background:transparent; }
+.re-baro-push { top:0; cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 20V5M6 11l6-6 6 6' fill='none' stroke='%23000' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 20V5M6 11l6-6 6 6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 12 12,n-resize; }
+.re-baro-pull { bottom:0; cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4v15M6 13l6 6 6-6' fill='none' stroke='%23000' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 4v15M6 13l6 6 6-6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 12 12,s-resize; }
+.re-baro-control.is-pushing { --re-baro-axial-scale:.94; --re-baro-shadow-y:.08cqw; --re-baro-shadow-blur:.08cqw; }
+.re-baro-control.is-pulling { --re-baro-axial-scale:1.06; --re-baro-shadow-y:.4cqw; --re-baro-shadow-blur:.34cqw; }
+
+.re-mode-control { position:absolute; z-index:5; left:35.076387457cqw; top:18.497904212cqw; width:31.141345427cqw; height:23.537414966cqw; overflow:visible; touch-action:none; }
+.re-mode-selector-frame { position:absolute; z-index:1; left:0; top:0; display:block; width:31.141345427cqw; height:16.124968506cqw; pointer-events:none; user-select:none; }
+.re-mode-handle-wrap { position:absolute; z-index:2; left:6.853111615cqw; top:6.853111615cqw; display:block; width:16.326530612cqw; height:16.628873772cqw; pointer-events:none; }
+.re-mode-handle { display:block; width:100%; height:100%; transform:rotate(var(--re-mode-rotation)); transform-origin:50% 49.687%; transition:transform 150ms cubic-bezier(.22,.78,.2,1); user-select:none; }
+.re-mode-turn { position:absolute; z-index:3; top:6.853111615cqw; width:8.163265306cqw; height:16.628873772cqw; padding:0; border:0; background:transparent; opacity:0; cursor:ew-resize; }
+.re-mode-turn-left { left:6.853111615cqw; }
+.re-mode-turn-right { left:15.016376921cqw; }
+
+.re-range-control { position:absolute; z-index:5; left:71.664490712cqw; top:21.62211686cqw; width:25.900730663cqw; height:19.853867473cqw; overflow:visible; touch-action:none; }
+.re-range-selector-frame { position:absolute; z-index:1; inset:0; display:block; width:100%; height:100%; pointer-events:none; user-select:none; }
+.re-range-handle-wrap { position:absolute; z-index:2; left:4.031242126cqw; top:3.728898967cqw; display:block; width:16.326530612cqw; height:16.628873772cqw; pointer-events:none; }
+.re-range-handle { display:block; width:100%; height:100%; transform:rotate(var(--re-range-rotation)); transform-origin:50% 49.687%; transition:transform 150ms cubic-bezier(.22,.78,.2,1); user-select:none; }
+.re-range-turn { position:absolute; z-index:3; top:3.728898967cqw; width:8.163265306cqw; height:16.628873772cqw; padding:0; border:0; background:transparent; opacity:0; cursor:ew-resize; }
+.re-range-turn-left { left:4.031242126cqw; }
+.re-range-turn-right { left:12.194507433cqw; }
+.re-visually-hidden { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
+
+.re-knob {
+  width: 16.326530612cqw;
+  height: 16.326530612cqw;
+  color: #f4f2df;
+}
+
+.re-knob-mount {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  border: .2cqw dashed var(--placeholder-edge);
+  border-radius: 50%;
+  background: radial-gradient(circle, #778388 0 31%, #273337 33% 51%, #77868a 53% 56%, #1b272b 58%);
+  box-shadow: 0 .35cqw .45cqw #1d2c3199;
+}
+
+.re-knob-mount i {
+  position: absolute;
+  left: 50%;
+  top: 3%;
+  width: .38cqw;
+  height: 2.1cqw;
+  border-radius: .2cqw;
+  background: #eef0df;
+  transform: translateX(-50%);
+}
+
+.re-knob > strong {
+  position: absolute;
+  left: 50%;
+  bottom: -9%;
+  transform: translateX(-50%);
+  font-size: 1.25cqw;
+  letter-spacing: .08cqw;
+}
+
+.re-knob-legend {
+  position: absolute;
+  inset: -24% -28%;
+  pointer-events: none;
+}
+
+.re-knob-legend span {
+  position: absolute;
+  font-size: 1.08cqw;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.re-knob-mode .re-knob-legend span:nth-child(1),
+.re-knob-range .re-knob-legend span:nth-child(1) { left: 2%; top: 53%; }
+.re-knob-mode .re-knob-legend span:nth-child(2),
+.re-knob-range .re-knob-legend span:nth-child(2) { left: 15%; top: 13%; }
+.re-knob-mode .re-knob-legend span:nth-child(3),
+.re-knob-range .re-knob-legend span:nth-child(3) { left: 50%; top: -2%; transform: translateX(-50%); }
+.re-knob-mode .re-knob-legend span:nth-child(4),
+.re-knob-range .re-knob-legend span:nth-child(4) { right: 14%; top: 13%; }
+.re-knob-mode .re-knob-legend span:nth-child(5),
+.re-knob-range .re-knob-legend span:nth-child(5) { right: 1%; top: 53%; }
+.re-knob-range .re-knob-legend span:nth-child(6) { left: 50%; bottom: -2%; transform: translateX(-50%); }
+
+.re-nav-selector {
+  width: 10.313216382cqw;
+  height: 8.348794063cqw;
+  color: #f4f2df;
+}
+
+.re-nav-label {
+  position: absolute;
+  z-index: 4;
+  font: 700 1.55cqw/1 'FCU Montserrat', sans-serif;
+  text-shadow: 0 1px 2px #253238;
+  white-space: nowrap;
+}
+
+.re-nav-label-adf { left:-3.65cqw; top:50%; transform:translateY(-50%); }
+.re-nav-label-off { left:50%; bottom:-2.25cqw; transform:translateX(-50%); }
+.re-nav-label-vor { right:-3.65cqw; top:50%; transform:translateY(-50%); }
+.re-nav-base { position:absolute; z-index:1; left:50%; top:50%; width:8.348794063cqw; height:8.348794063cqw; transform:translate(-50%,-50%); pointer-events:none; user-select:none; }
+.re-nav-actuator { position:absolute; z-index:2; left:50%; top:50%; width:10.313216382cqw; height:4.419950818cqw; transform:translate(-50%,-50%); pointer-events:none; user-select:none; }
+.re-nav-hit { position:absolute; z-index:3; top:0; width:50%; height:100%; padding:0; border:0; background:transparent; }
+.re-nav-hit-left { left:0; cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M20 12H5M11 6l-6 6 6 6' fill='none' stroke='%23000' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20 12H5M11 6l-6 6 6 6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 12 12,w-resize; }
+.re-nav-hit-right { right:0; cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M4 12h15M13 6l6 6-6 6' fill='none' stroke='%23000' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M4 12h15M13 6l6 6-6 6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 12 12,e-resize; }
+.re-nav-index { position:absolute; z-index:4; left:50%; top:-2.25cqw; transform:translateX(-50%); font:700 1.55cqw/1 'FCU Montserrat',sans-serif; text-shadow:0 1px 2px #253238; }
+
+.re-divider { position:absolute; z-index:2; left:33.024118738cqw; top:20.222634508cqw; width:.742115028cqw; height:36.734693878cqw; background:#e5e7df; box-shadow:.08cqw 0 .1cqw #24363b66; }

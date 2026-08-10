@@ -1,0 +1,10 @@
+node_modules
+dist
+.vite
+*.local
+*.tsbuildinfo
+.tools
+.runtime
+ast/
+bridge/**/bin
+bridge/**/obj
