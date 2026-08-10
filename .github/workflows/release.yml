@@ -93,6 +93,13 @@ jobs:
         run: |
           $publish = (Resolve-Path release-staging/publish).Path
           $bridge = Join-Path $publish 'bridge'
+          $redist = Join-Path $publish 'prerequisites/VC_redist.x64.exe'
+          $redistProcess = Start-Process -FilePath $redist `
+            -ArgumentList @('/install', '/quiet', '/norestart') `
+            -Wait -PassThru -WindowStyle Hidden
+          if ($redistProcess.ExitCode -notin @(0, 1638, 3010)) {
+            throw "VC++ Redistributable setup failed with exit code $($redistProcess.ExitCode)."
+          }
           foreach ($required in @(
             'A320Boards.Bridge.dll',
             'Microsoft.FlightSimulator.SimConnect.dll',
