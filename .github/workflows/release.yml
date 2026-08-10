@@ -123,9 +123,9 @@ jobs:
           $stdout = Join-Path $env:RUNNER_TEMP 'bridge-smoke.stdout.log'
           $stderr = Join-Path $env:RUNNER_TEMP 'bridge-smoke.stderr.log'
           $dotnet = Join-Path $publish 'runtime/dotnet.exe'
+          # With no MSFS on the runner, probe mode exits immediately after a
+          # failed connection. Normal mode keeps retrying while HTTP is tested.
           $process = Start-Process -FilePath $dotnet `
-            # With no MSFS on the runner, probe mode exits immediately after a
-            # failed connection. Normal mode keeps retrying while HTTP is tested.
             -ArgumentList @('exec', (Join-Path $bridge 'A320Boards.Bridge.dll'), '--no-browser', '--read-only', '--port', '8399') `
             -WorkingDirectory $publish -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru -WindowStyle Hidden
           try {
