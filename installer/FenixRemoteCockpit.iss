@@ -33,7 +33,7 @@ SolidCompression=yes
 WizardStyle=modern
 InfoBeforeFile=prerequisites.txt
 UninstallDisplayName=Fenix A320 Remote Cockpit
-UninstallDisplayIcon={app}\A320Boards.Bridge.exe
+UninstallDisplayIcon={app}\runtime\dotnet.exe
 VersionInfoVersion={#MyNumericVersion}
 VersionInfoProductName=Fenix A320 Remote Cockpit
 VersionInfoCompany=lacrielll
@@ -50,9 +50,9 @@ Source: "..\THIRD_PARTY_NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSES\*"; DestDir: "{app}\LICENSES"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\Fenix A320 Remote Cockpit"; Filename: "{app}\A320Boards.Bridge.exe"; WorkingDir: "{app}"
+Name: "{group}\Fenix A320 Remote Cockpit"; Filename: "{app}\runtime\dotnet.exe"; Parameters: "exec ""{app}\bridge\A320Boards.Bridge.dll"""; WorkingDir: "{app}\bridge"
 Name: "{group}\Install or repair MobiFlight module"; Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\tools\Install-MobiFlightModule.ps1"" -Source ""{app}\mobiflight-event-module"""; WorkingDir: "{app}"
-Name: "{autodesktop}\Fenix A320 Remote Cockpit"; Filename: "{app}\A320Boards.Bridge.exe"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{autodesktop}\Fenix A320 Remote Cockpit"; Filename: "{app}\runtime\dotnet.exe"; Parameters: "exec ""{app}\bridge\A320Boards.Bridge.dll"""; WorkingDir: "{app}\bridge"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"
@@ -60,8 +60,8 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 [Run]
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\tools\Install-MobiFlightModule.ps1"" -Source ""{app}\mobiflight-event-module"""; Flags: waituntilterminated; StatusMsg: "Checking the MSFS Community folder and installing the MobiFlight WASM Module..."
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Fenix A320 Remote Cockpit"""; Flags: runhidden waituntilterminated
-Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Fenix A320 Remote Cockpit"" dir=in action=allow program=""{app}\A320Boards.Bridge.exe"" enable=yes profile=private"; Flags: runhidden waituntilterminated
-Filename: "{app}\A320Boards.Bridge.exe"; Description: "Launch Fenix A320 Remote Cockpit"; Flags: nowait postinstall skipifsilent
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Fenix A320 Remote Cockpit"" dir=in action=allow program=""{app}\runtime\dotnet.exe"" enable=yes profile=private"; Flags: runhidden waituntilterminated
+Filename: "{app}\runtime\dotnet.exe"; Parameters: "exec ""{app}\bridge\A320Boards.Bridge.dll"""; WorkingDir: "{app}\bridge"; Description: "Launch Fenix A320 Remote Cockpit"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Fenix A320 Remote Cockpit"""; Flags: runhidden waituntilterminated

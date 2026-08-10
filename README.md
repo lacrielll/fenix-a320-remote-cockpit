@@ -219,9 +219,10 @@ git push origin v0.1.0
 ```
 
 The GitHub Actions release workflow builds the production web interface,
-publishes a self-contained Windows x64 bridge, compiles the Inno Setup
-installer, generates its SHA-256 checksum, and creates a GitHub Release with
-both files. Prerelease tags such as `v0.2.0-alpha.1` create prerelease entries.
+publishes the bridge with a private Windows x64 .NET runtime, compiles the
+Inno Setup installer, generates its SHA-256 checksum, and creates a GitHub
+Release with both files. Prerelease tags such as `v0.2.0-alpha.1` create
+prerelease entries.
 
 ## Troubleshooting
 

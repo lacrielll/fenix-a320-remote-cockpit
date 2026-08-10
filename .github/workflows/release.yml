@@ -44,20 +44,42 @@ jobs:
       - name: Build web interface
         run: npm run build
 
-      - name: Publish self-contained Windows bridge
+      - name: Publish Windows bridge with private runtime
         shell: pwsh
         run: |
           dotnet publish bridge/A320Boards.Bridge/A320Boards.Bridge.csproj `
             --configuration Release `
-            --runtime win-x64 `
-            --self-contained true `
-            -p:PublishSingleFile=true `
-            -p:IncludeNativeLibrariesForSelfExtract=true `
+            --self-contained false `
+            -p:UseAppHost=false `
             -p:DebugType=None `
             -p:DebugSymbols=false `
             -p:Version=${{ steps.version.outputs.value }} `
-            --output release-staging/publish
-          Copy-Item -LiteralPath dist -Destination release-staging/publish/web -Recurse
+            --output release-staging/publish/bridge
+          Copy-Item -LiteralPath dist -Destination release-staging/publish/bridge/web -Recurse
+
+          $dotnetExe = (Get-Command dotnet).Source
+          $dotnetRoot = Split-Path $dotnetExe
+          $runtimeVersion = dotnet --list-runtimes |
+            Where-Object { $_ -match '^Microsoft\.NETCore\.App 8\.' } |
+            ForEach-Object { [regex]::Match($_, '^Microsoft\.NETCore\.App ([^ ]+)').Groups[1].Value } |
+            Sort-Object { [version]$_ } -Descending |
+            Select-Object -First 1
+          $fxrVersion = Get-ChildItem -LiteralPath (Join-Path $dotnetRoot 'host/fxr') -Directory |
+            Where-Object { $_.Name -like '8.*' } |
+            Sort-Object { [version]$_.Name } -Descending |
+            Select-Object -First 1 -ExpandProperty Name
+          if (-not $runtimeVersion -or -not $fxrVersion) { throw 'The .NET 8 runtime layout was not found on the runner.' }
+
+          $privateRuntime = New-Item -ItemType Directory -Force release-staging/publish/runtime
+          Copy-Item -LiteralPath $dotnetExe -Destination $privateRuntime.FullName
+          New-Item -ItemType Directory -Force "$($privateRuntime.FullName)/host/fxr" | Out-Null
+          Copy-Item -LiteralPath (Join-Path $dotnetRoot "host/fxr/$fxrVersion") -Destination "$($privateRuntime.FullName)/host/fxr/$fxrVersion" -Recurse
+          New-Item -ItemType Directory -Force "$($privateRuntime.FullName)/shared/Microsoft.NETCore.App" | Out-Null
+          Copy-Item -LiteralPath (Join-Path $dotnetRoot "shared/Microsoft.NETCore.App/$runtimeVersion") -Destination "$($privateRuntime.FullName)/shared/Microsoft.NETCore.App/$runtimeVersion" -Recurse
+          foreach ($notice in @('LICENSE.txt', 'ThirdPartyNotices.txt')) {
+            $noticePath = Join-Path $dotnetRoot $notice
+            if (Test-Path -LiteralPath $noticePath) { Copy-Item -LiteralPath $noticePath -Destination $privateRuntime.FullName }
+          }
 
       - name: Install Inno Setup
         shell: pwsh
