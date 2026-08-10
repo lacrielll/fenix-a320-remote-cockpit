@@ -84,12 +84,16 @@ running the downloaded file.
 
 Setup locates the MSFS Community folder through `UserCfg.opt`, installs or
 updates the bundled MobiFlight WASM Module, adds a private-network Windows
-Firewall rule, and creates application shortcuts. Restart MSFS after setup if
-the simulator was running during installation.
+Firewall rule for TCP port `8380`, removes files left by older application
+layouts, and creates application shortcuts. Restart MSFS after setup if the
+simulator was running during installation.
 
 Launch **Fenix A320 Remote Cockpit** from the Start menu or desktop. The local
 bridge starts, serves the web interface on port `8380`, and opens it in the
-default browser. Other devices on the same network can open:
+default browser. Its console window lists the available URLs for every active
+network adapter and must remain open while using the application. The Start
+menu also contains a **Connection information** shortcut. Other devices on
+the same network can open:
 
 ```text
 http://<MSFS-PC-IP>:8380/
@@ -98,6 +102,10 @@ http://<MSFS-PC-IP>:8380/
 If setup could not find MSFS because the simulator has never been started,
 start MSFS once and then use **Install or repair MobiFlight module** from the
 Start menu.
+
+Readable copies of the cockpit layout SVG and background image are installed
+under `artwork/cockpit`. The production web bundle keeps its own optimized,
+hash-named copies under `bridge/web/assets`.
 
 ### Building from source
 

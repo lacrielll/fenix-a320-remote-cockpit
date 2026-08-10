@@ -1,6 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Threading;
 using A320Boards.Bridge.Sim;
 using A320Boards.Bridge.Transport;
@@ -14,6 +17,14 @@ namespace A320Boards.Bridge
             Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
             Console.SetError(new StreamWriter(Console.OpenStandardError()) { AutoFlush = true });
             Console.OutputEncoding = System.Text.Encoding.UTF8;
+            using var instanceMutex = new Mutex(true, "FenixA320RemoteCockpitBridge", out var isFirstInstance);
+            if (!isFirstInstance)
+            {
+                Console.WriteLine("Fenix A320 Remote Cockpit is already running.");
+                OpenBrowser("http://localhost:8380/");
+                return;
+            }
+
             Console.WriteLine("Fenix A320 Remote Cockpit Bridge");
             Console.WriteLine("Waiting for Microsoft Flight Simulator...");
 
@@ -40,17 +51,10 @@ namespace A320Boards.Bridge
                 if (Directory.Exists(webRoot))
                 {
                     var localUrl = "http://localhost:" + port + "/";
-                    Console.WriteLine("Remote cockpit: " + localUrl);
+                    PrintConnectionInformation(port, localUrl);
                     if (!noBrowser)
                     {
-                        try
-                        {
-                            Process.Start(new ProcessStartInfo(localUrl) { UseShellExecute = true });
-                        }
-                        catch (Exception exception)
-                        {
-                            Console.Error.WriteLine("Could not open the browser: " + exception.Message);
-                        }
+                        OpenBrowser(localUrl);
                     }
                 }
                 var reconnect = true;
@@ -73,6 +77,56 @@ namespace A320Boards.Bridge
                         Thread.Sleep(2000);
                     }
                 }
+            }
+        }
+
+        private static void PrintConnectionInformation(int port, string localUrl)
+        {
+            Console.WriteLine();
+            Console.WriteLine("OPEN ON THIS PC:");
+            Console.WriteLine("  " + localUrl);
+            Console.WriteLine();
+            Console.WriteLine("OPEN ON ANOTHER DEVICE ON THE SAME NETWORK:");
+
+            var addresses = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(adapter => adapter.OperationalStatus == OperationalStatus.Up &&
+                                  adapter.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .SelectMany(adapter => adapter.GetIPProperties().UnicastAddresses
+                    .Where(address => address.Address.AddressFamily == AddressFamily.InterNetwork &&
+                                      !System.Net.IPAddress.IsLoopback(address.Address))
+                    .Select(address => new { adapter.Name, Address = address.Address.ToString() }))
+                .Distinct()
+                .OrderBy(item => item.Name)
+                .ThenBy(item => item.Address)
+                .ToArray();
+
+            if (addresses.Length == 0)
+            {
+                Console.WriteLine("  No LAN IPv4 address was found.");
+            }
+            else
+            {
+                foreach (var item in addresses)
+                {
+                    Console.WriteLine("  http://" + item.Address + ":" + port + "/  [" + item.Name + "]");
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Keep this window open while using the remote cockpit.");
+            Console.WriteLine("The other device must be on the same LAN/VPN. Windows Firewall access is enabled for private networks.");
+            Console.WriteLine(new string('-', 78));
+        }
+
+        private static void OpenBrowser(string url)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception exception)
+            {
+                Console.Error.WriteLine("Could not open the browser: " + exception.Message);
             }
         }
     }
