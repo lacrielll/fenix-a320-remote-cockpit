@@ -46,6 +46,13 @@ const initialOverhead: OverheadState = {
 
 export function App() {
   const { fcu, efis, efisFirstOfficer, overhead, send } = useFcuBridge(initialFcu, initialEfis, initialOverhead)
+  const [tabletMode, setTabletMode] = useState(() => {
+    try {
+      return window.localStorage.getItem('fenix-remote-cockpit-tablet-mode') === 'true'
+    } catch {
+      return false
+    }
+  })
   type PanelPage = 'cockpit' | 'overhead' | 'fcu' | 'efisCaptain' | 'efisFirstOfficer'
   const overheadZoneFromHash = (): OverheadZone | null => {
     const match = window.location.hash.match(/^#overhead-zone-([1-9])$/)
@@ -76,6 +83,14 @@ export function App() {
     }
   }, [])
 
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('fenix-remote-cockpit-tablet-mode', String(tabletMode))
+    } catch {
+      // The mode still works when browser storage is unavailable.
+    }
+  }, [tabletMode])
+
   const openPanelPage = (page: PanelPage) => {
     if (panelPage === page && !(page === 'overhead' && overheadZone !== null)) return
     const hashByPage: Record<PanelPage, string> = {
@@ -105,7 +120,17 @@ export function App() {
   const showOverview = panelPage === 'cockpit' || isReturningToCockpit
   const showDetail = panelPage !== 'cockpit'
 
-  return <main className={`app-shell ${panelPage === 'cockpit' ? 'is-overview-page' : 'is-detail-page'} ${isReturningToCockpit ? `is-returning-to-cockpit return-from-${panelPage}` : ''}`}>
+  return <main className={`app-shell ${panelPage === 'cockpit' ? 'is-overview-page' : 'is-detail-page'} ${tabletMode ? 'is-tablet-mode' : ''} ${isReturningToCockpit ? `is-returning-to-cockpit return-from-${panelPage}` : ''}`}>
+    <button
+      className={`tablet-mode-toggle ${tabletMode ? 'is-active' : ''}`}
+      type="button"
+      onClick={() => setTabletMode(active => !active)}
+      aria-pressed={tabletMode}
+      title="Show touch controls for cockpit knobs"
+    >
+      <span className="tablet-mode-lamp" aria-hidden="true" />
+      <span>TABLET MODE</span>
+    </button>
     {showOverview && <div className={`cockpit-page cockpit-page-overview ${isReturningToCockpit ? 'cockpit-page-return-preview' : ''}`}>
         <div className="scene-head">
           <div><span className="eyebrow">A320 · FLIGHT DECK</span><h1>Cockpit overview</h1></div>

@@ -197,11 +197,13 @@ function AdirsSelector({ x, position, onRotate, onSet }: { x: number; position?:
   const [fallbackPosition, setFallbackPosition] = useState(1)
   const selectedPosition = Math.max(0, Math.min(2, Math.round(position ?? fallbackPosition))) as 0 | 1 | 2
   const rotation = [-45, 0, 45][selectedPosition]
-  const rotateWithWheel = (event: WheelEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    const direction: 1 | -1 = event.deltaY > 0 ? 1 : -1
+  const rotate = (direction: 1 | -1) => {
     if (onRotate) onRotate(direction)
     else setFallbackPosition(value => Math.max(0, Math.min(2, value + direction)))
+  }
+  const rotateWithWheel = (event: WheelEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    rotate(event.deltaY > 0 ? 1 : -1)
   }
   const cycle = () => {
     const next = (selectedPosition + 1) % 3 as 0 | 1 | 2

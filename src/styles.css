@@ -6,6 +6,80 @@ html, body, #root { margin: 0; width:100%; height:100%; min-width:320px; overflo
 button { font: inherit; }
 button:focus-visible { outline: 2px solid #71b8d1; outline-offset: 3px; }
 .app-shell { position:relative; width:100%; height:100vh; background: radial-gradient(circle at 50% 20%, #252a2e 0, #111519 38%, #080a0c 72%); overflow:hidden; }
+.tablet-mode-toggle{position:fixed;z-index:100;right:18px;bottom:16px;display:flex;align-items:center;gap:8px;height:38px;padding:0 13px;border:1px solid #344047;border-radius:6px;background:#0c1114e8;color:#89979c;box-shadow:0 5px 16px #0008;cursor:pointer;font:600 10px 'Barlow Condensed',sans-serif;letter-spacing:1.25px;backdrop-filter:blur(7px);transition:color 120ms ease,border-color 120ms ease,background 120ms ease}.tablet-mode-toggle:hover{border-color:#6f9aa7;color:#e6ecee}.tablet-mode-toggle.is-active{border-color:#759c8d;background:#14201ddf;color:#e5eee9}.tablet-mode-lamp{width:8px;height:3px;border-radius:1px;background:#26302f;box-shadow:inset 0 1px 1px #000}.tablet-mode-toggle.is-active .tablet-mode-lamp{background:#60df9a;box-shadow:0 0 7px #54e69b}
+
+/* Explicit touch targets. The normal invisible mouse hit areas remain unchanged
+ * until tablet mode is enabled. */
+.is-tablet-mode.is-detail-page .rf-knob,
+.is-tablet-mode.is-detail-page .re-baro-control,
+.is-tablet-mode.is-detail-page .re-mode-control,
+.is-tablet-mode.is-detail-page .re-range-control,
+.is-tablet-mode.is-detail-page .re-nav-selector{z-index:40}
+.is-tablet-mode.is-detail-page .rf-turn-hit,
+.is-tablet-mode.is-detail-page .re-baro-turn,
+.is-tablet-mode.is-detail-page .re-mode-turn,
+.is-tablet-mode.is-detail-page .re-range-turn,
+.is-tablet-mode.is-detail-page .re-nav-hit{z-index:60;display:grid;place-items:center;border:1px solid #788789b8;background:linear-gradient(#526064b8,#283236b8);color:#f1f2e8;box-shadow:inset 0 1px #a8b1af55,0 .18cqw .3cqw #0008;text-shadow:0 1px 1px #000;border-radius:18%;opacity:.78;cursor:pointer;font:700 1.45cqw/1 Inter,sans-serif;touch-action:manipulation;backdrop-filter:blur(2px)}
+.is-tablet-mode.is-detail-page .rf-turn-hit:active,
+.is-tablet-mode.is-detail-page .re-baro-turn:active,
+.is-tablet-mode.is-detail-page .re-mode-turn:active,
+.is-tablet-mode.is-detail-page .re-range-turn:active,
+.is-tablet-mode.is-detail-page .re-nav-hit:active{background:linear-gradient(#273135,#424e51);box-shadow:inset 0 .28cqw .4cqw #000c;filter:brightness(.82)}
+
+.is-tablet-mode.is-detail-page .rf-turn-hit{top:3.3cqw;width:2.55cqw;height:2.55cqw;opacity:.78}
+.is-tablet-mode.is-detail-page .rf-turn-left{left:-1.15cqw}
+.is-tablet-mode.is-detail-page .rf-turn-right{right:-1.15cqw}
+.is-tablet-mode.is-detail-page .rf-turn-left::after,
+.is-tablet-mode.is-detail-page .re-baro-turn-left::after,
+.is-tablet-mode.is-detail-page .re-mode-turn-left::after,
+.is-tablet-mode.is-detail-page .re-range-turn-left::after{content:'−'}
+.is-tablet-mode.is-detail-page .rf-turn-right::after,
+.is-tablet-mode.is-detail-page .re-baro-turn-right::after,
+.is-tablet-mode.is-detail-page .re-mode-turn-right::after,
+.is-tablet-mode.is-detail-page .re-range-turn-right::after{content:'+'}
+.is-tablet-mode.is-detail-page .re-nav-hit-left::after{content:'‹'}
+.is-tablet-mode.is-detail-page .re-nav-hit-right::after{content:'›'}
+
+.is-tablet-mode.is-detail-page .rf-axial-actions,
+.is-tablet-mode.is-detail-page .re-baro-axial-actions{z-index:60;overflow:visible;pointer-events:none}
+.is-tablet-mode.is-detail-page .rf-axial,
+.is-tablet-mode.is-detail-page .re-baro-axial{left:50%;display:grid;place-items:center;width:4cqw;height:1.35cqw;padding:0 .4cqw;border:1px solid #788789b8;border-radius:.28cqw;background:linear-gradient(#526064b8,#283236b8);color:#f1f2e8;box-shadow:inset 0 1px #a8b1af55,0 .18cqw .3cqw #0008;opacity:.78;transform:translateX(-50%);font:700 .68cqw/1 'Barlow Condensed',sans-serif;letter-spacing:.07cqw;text-shadow:0 1px 1px #000;pointer-events:auto;touch-action:manipulation;backdrop-filter:blur(2px)}
+.is-tablet-mode.is-detail-page .rf-push,
+.is-tablet-mode.is-detail-page .re-baro-push{top:-2.05cqw}
+.is-tablet-mode.is-detail-page .rf-pull,
+.is-tablet-mode.is-detail-page .re-baro-pull{bottom:-2.05cqw}
+.is-tablet-mode.is-detail-page .rf-push::after,
+.is-tablet-mode.is-detail-page .re-baro-push::after{content:'PUSH'}
+.is-tablet-mode.is-detail-page .rf-pull::after,
+.is-tablet-mode.is-detail-page .re-baro-pull::after{content:'PULL'}
+.is-tablet-mode.is-detail-page .rf-axial:active,
+.is-tablet-mode.is-detail-page .re-baro-axial:active{filter:brightness(.72);box-shadow:inset 0 .2cqw .3cqw #000b}
+
+.is-tablet-mode.is-detail-page .rf-knob-altitude .rf-push,
+.is-tablet-mode.is-detail-page .rf-knob-altitude .rf-pull{top:6.65cqw;bottom:auto}
+.is-tablet-mode.is-detail-page .rf-knob-altitude .rf-push{left:-20%}
+.is-tablet-mode.is-detail-page .rf-knob-altitude .rf-pull{left:120%}
+
+.is-tablet-mode.is-detail-page .re-baro-turn{top:1.32cqw;width:6.2cqw;height:6.2cqw;font-size:2.8cqw}
+.is-tablet-mode.is-detail-page .re-baro-turn-left{left:-6.8cqw}
+.is-tablet-mode.is-detail-page .re-baro-turn-right{right:-6.8cqw}
+.is-tablet-mode.is-detail-page .re-baro-axial{width:6.8cqw;height:2.45cqw;font-size:1.15cqw}
+.is-tablet-mode.is-detail-page .re-baro-push{top:-2.7cqw}
+.is-tablet-mode.is-detail-page .re-baro-pull{bottom:-2.7cqw}
+
+.is-tablet-mode.is-detail-page .re-mode-turn,
+.is-tablet-mode.is-detail-page .re-range-turn{width:5.8cqw;height:5.8cqw;font-size:2.65cqw}
+.is-tablet-mode.is-detail-page .re-mode-turn{top:12.2cqw}
+.is-tablet-mode.is-detail-page .re-mode-turn-left{left:1.1cqw}
+.is-tablet-mode.is-detail-page .re-mode-turn-right{left:auto;right:1.1cqw}
+.is-tablet-mode.is-detail-page .re-range-turn{top:9cqw}
+.is-tablet-mode.is-detail-page .re-range-turn-left{left:-2.6cqw}
+.is-tablet-mode.is-detail-page .re-range-turn-right{left:auto;right:-2.6cqw}
+
+.is-tablet-mode.is-detail-page .re-nav-hit{top:50%;width:5.5cqw;height:5.5cqw;transform:translateY(-50%);font-size:3cqw}
+.is-tablet-mode.is-detail-page .re-nav-hit-left{left:-5.4cqw}
+.is-tablet-mode.is-detail-page .re-nav-hit-right{right:-5.4cqw}
+
 .detail-back-button{position:fixed;z-index:20;left:18px;top:16px;display:flex;align-items:center;gap:8px;height:38px;padding:0 13px;border:1px solid #344047;border-radius:6px;background:#0c1114d9;color:#b8c4c8;box-shadow:0 5px 16px #0008;cursor:pointer;font:600 11px 'Barlow Condensed',sans-serif;letter-spacing:1.4px;backdrop-filter:blur(7px)}.detail-back-button>span:first-child{color:#8db8c5;font:500 20px/1 Inter,sans-serif}.detail-back-button:hover{border-color:#6f9aa7;background:#131b1f;color:#edf2f3}
 .topbar { height: 72px; display: grid; grid-template-columns: 240px 1fr 150px; align-items: center; padding: 0 30px; border-bottom: 1px solid #2b3136; background: rgba(8,11,13,.94); position: relative; z-index: 5; }
 .brand { display: flex; align-items: center; gap: 12px; }
