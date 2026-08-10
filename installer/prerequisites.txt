@@ -1,0 +1,16 @@
+Fenix A320 Remote Cockpit requires:
+
+  - Microsoft Flight Simulator 2020 or 2024
+  - Fenix A320
+  - Windows 10 or Windows 11 (64-bit)
+
+The application itself is self-contained. Node.js, the .NET runtime and
+Visual Studio are not required for the installed version.
+
+Setup will try to locate the simulator Community folder and install or update
+the bundled MobiFlight WASM Module. If MSFS has never been started or its
+packages cannot be located, setup will continue and a Start menu shortcut can
+be used to install or repair the module later.
+
+Restart Microsoft Flight Simulator after installing or updating the module.
+

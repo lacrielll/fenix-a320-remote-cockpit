@@ -44,7 +44,12 @@ function createCommandId() {
 
 function bridgeUrl() {
   const configured = import.meta.env.VITE_FCU_BRIDGE_URL as string | undefined
-  return configured || `ws://${window.location.hostname || '127.0.0.1'}:8380/ws`
+  if (configured) return configured
+  if (!import.meta.env.DEV) {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    return `${protocol}//${window.location.host}/ws`
+  }
+  return `ws://${window.location.hostname || '127.0.0.1'}:8380/ws`
 }
 
 export function useFcuBridge(initialFcu: FcuState, initialEfis: EfisState, initialOverhead: OverheadState) {

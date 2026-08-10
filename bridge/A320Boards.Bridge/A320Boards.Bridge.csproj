@@ -12,5 +12,6 @@
       <HintPath>lib\Microsoft.FlightSimulator.SimConnect.dll</HintPath>
       <Private>true</Private>
     </Reference>
+    <None Update="lib\SimConnect.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

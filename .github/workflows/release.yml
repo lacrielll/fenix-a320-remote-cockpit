@@ -1,0 +1,95 @@
+name: Build and release Windows installer
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Read release version
+        id: version
+        shell: pwsh
+        run: |
+          $releaseVersion = "${{ github.ref_name }}".TrimStart('v')
+          if ($releaseVersion -notmatch '^\d+\.\d+\.\d+([-.][0-9A-Za-z.-]+)?$') {
+            throw "Tag must use a version such as v0.1.0 or v0.1.0-alpha.1"
+          }
+          "value=$releaseVersion" >> $env:GITHUB_OUTPUT
+          "numeric=$($releaseVersion.Split('-')[0])" >> $env:GITHUB_OUTPUT
+
+      - name: Install web dependencies
+        run: npm ci
+
+      - name: Build web interface
+        run: npm run build
+
+      - name: Publish self-contained Windows bridge
+        shell: pwsh
+        run: |
+          dotnet publish bridge/A320Boards.Bridge/A320Boards.Bridge.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:DebugType=None `
+            -p:DebugSymbols=false `
+            -p:Version=${{ steps.version.outputs.value }} `
+            --output release-staging/publish
+          Copy-Item -LiteralPath dist -Destination release-staging/publish/web -Recurse
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress --yes
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path -LiteralPath $iscc)) { throw "Inno Setup compiler was not found: $iscc" }
+          New-Item -ItemType Directory -Force release-staging/installer | Out-Null
+          & $iscc `
+            "/DMyAppVersion=${{ steps.version.outputs.value }}" `
+            "/DMyNumericVersion=${{ steps.version.outputs.numeric }}" `
+            "/DPublishDir=$((Resolve-Path release-staging/publish).Path)" `
+            "/DOutputDir=$((Resolve-Path release-staging/installer).Path)" `
+            installer/FenixRemoteCockpit.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
+
+      - name: Create checksum
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem release-staging/installer/Fenix-A320-Remote-Cockpit-*-Setup.exe -File | Select-Object -First 1
+          if ($null -eq $installer) { throw 'Installer output was not found.' }
+          $hash = (Get-FileHash -LiteralPath $installer.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $($installer.Name)" | Set-Content -Encoding ascii "$($installer.FullName).sha256"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            release-staging/installer/Fenix-A320-Remote-Cockpit-*-Setup.exe
+            release-staging/installer/Fenix-A320-Remote-Cockpit-*-Setup.exe.sha256

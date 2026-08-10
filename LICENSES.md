@@ -11,6 +11,7 @@ PolyForm Noncommercial License 1.0.0, whose complete text is in `LICENSE`:
 
 - `src/**/*.ts`, `src/**/*.tsx`, and `src/**/*.css`
 - `bridge/**/*.cs` and project/build files
+- `installer/` scripts and `.github/workflows/` automation
 - root HTML, TypeScript, Vite, and package configuration files
 
 Copyright (C) 2026 Fenix A320 Remote Cockpit contributors.

@@ -32,6 +32,18 @@ Fenix A320 Remote Cockpit is an independent, unofficial project. It is not
 affiliated with or endorsed by Airbus, Fenix Simulations, Microsoft,
 FlyByWire Simulations, or MobiFlight.
 
+## Project status
+
+| Area | Status |
+| --- | --- |
+| FCU | Ready |
+| EFIS | Ready |
+| Overhead — FLT CTL and ADIRS | Ready |
+| Remaining overhead panels | Work in progress |
+| Pedestal | Planned |
+| Autobrakes | Planned |
+| Landing gear panel | Planned |
+
 ## Current panels
 
 ### FCU
@@ -50,16 +62,52 @@ FlyByWire Simulations, or MobiFlight.
 
 - Microsoft Flight Simulator 2020 or 2024 on Windows
 - Fenix A320
-- [Node.js](https://nodejs.org/) with npm
-- [.NET 8 runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
-- Visual Studio 2022 or Visual Studio Build Tools with the C# compiler
-- [MobiFlight Connector](https://www.mobiflight.com/en/download.html) and its
-  MSFS WASM module
+- Windows 10 or Windows 11 (64-bit)
+- MobiFlight WASM Module (included and installed automatically by the Windows
+  installer)
 
 The web interface can run in any modern browser. The bridge must run on the
 same Windows PC as Microsoft Flight Simulator.
 
 ## Installation
+
+### Ready-to-run Windows installer
+
+Download `Fenix-A320-Remote-Cockpit-<version>-Setup.exe` from the
+[latest GitHub release](https://github.com/lacrielll/fenix-a320-remote-cockpit/releases/latest)
+and run it. The installed application is self-contained: Node.js, the .NET
+runtime and Visual Studio are not required.
+
+Release installers are currently unsigned, so Windows SmartScreen may show an
+unknown-publisher warning. Verify the accompanying `.sha256` checksum before
+running the downloaded file.
+
+Setup locates the MSFS Community folder through `UserCfg.opt`, installs or
+updates the bundled MobiFlight WASM Module, adds a private-network Windows
+Firewall rule, and creates application shortcuts. Restart MSFS after setup if
+the simulator was running during installation.
+
+Launch **Fenix A320 Remote Cockpit** from the Start menu or desktop. The local
+bridge starts, serves the web interface on port `8380`, and opens it in the
+default browser. Other devices on the same network can open:
+
+```text
+http://<MSFS-PC-IP>:8380/
+```
+
+If setup could not find MSFS because the simulator has never been started,
+start MSFS once and then use **Install or repair MobiFlight module** from the
+Start menu.
+
+### Building from source
+
+Building from source additionally requires:
+
+- [Node.js](https://nodejs.org/) with npm
+- [.NET 8 runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+- Visual Studio 2022 or Visual Studio Build Tools with the C# compiler
+- [MobiFlight Connector](https://www.mobiflight.com/en/download.html), if the
+  bundled WASM module is not installed manually
 
 ### 1. Install the MobiFlight WASM module
 
@@ -97,7 +145,7 @@ The build script uses the C# compiler from Visual Studio and the installed
 .NET 8 runtime. The resulting bridge is written to
 `bridge/A320Boards.Bridge/bin/Debug/net8.0/`.
 
-## Running
+## Running from source
 
 1. Start Microsoft Flight Simulator.
 2. Load the Fenix A320 into a flight and wait until the aircraft is ready.
@@ -160,6 +208,20 @@ git pull
 npm install
 npm run bridge:build
 ```
+
+## Creating a release
+
+Maintainers create a release by pushing a semantic version tag:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The GitHub Actions release workflow builds the production web interface,
+publishes a self-contained Windows x64 bridge, compiles the Inno Setup
+installer, generates its SHA-256 checksum, and creates a GitHub Release with
+both files. Prerelease tags such as `v0.2.0-alpha.1` create prerelease entries.
 
 ## Troubleshooting
 
