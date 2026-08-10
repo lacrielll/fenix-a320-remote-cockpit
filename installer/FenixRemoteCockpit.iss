@@ -41,7 +41,7 @@ VersionInfoCompany=lacrielll
 VersionInfoDescription=Browser-based remote cockpit for the Fenix A320
 
 [Files]
-Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PublishDir}\*"; DestDir: "{app}"; Excludes: "prerequisites\*"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "Install-MobiFlightModule.ps1"; DestDir: "{app}\tools"; Flags: ignoreversion
 Source: "Show-ConnectionInfo.ps1"; DestDir: "{app}\tools"; Flags: ignoreversion
 Source: "Start Remote Cockpit.cmd"; DestDir: "{app}"; Flags: ignoreversion
@@ -53,6 +53,7 @@ Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\THIRD_PARTY_NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSES\*"; DestDir: "{app}\LICENSES"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#PublishDir}\prerequisites\VC_redist.x64.exe"; DestDir: "{tmp}\fenix-remote-cockpit"; Flags: deleteafterinstall
 
 [Icons]
 Name: "{group}\Fenix A320 Remote Cockpit"; Filename: "{app}\Start Remote Cockpit.cmd"; WorkingDir: "{app}"
@@ -73,6 +74,7 @@ Type: filesandordirs; Name: "{app}\runtime"
 Type: filesandordirs; Name: "{app}\artwork"
 
 [Run]
+Filename: "{tmp}\fenix-remote-cockpit\VC_redist.x64.exe"; Parameters: "/install /quiet /norestart"; Flags: waituntilterminated; StatusMsg: "Installing the Microsoft Visual C++ runtime required by SimConnect..."
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\tools\Install-MobiFlightModule.ps1"" -Source ""{app}\mobiflight-event-module"""; Flags: waituntilterminated; StatusMsg: "Checking the MSFS Community folder and installing the MobiFlight WASM Module..."
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Fenix A320 Remote Cockpit"""; Flags: runhidden waituntilterminated
 Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Fenix A320 Remote Cockpit (TCP 8380)"""; Flags: runhidden waituntilterminated

@@ -12,6 +12,11 @@
       <HintPath>lib\Microsoft.FlightSimulator.SimConnect.dll</HintPath>
       <Private>true</Private>
     </Reference>
-    <None Update="lib\SimConnect.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- The managed SimConnect wrapper loads this native DLL by name.  It must
+         sit beside A320Boards.Bridge.dll, not under the source lib folder. -->
+    <None Update="lib\SimConnect.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest"
+          TargetPath="SimConnect.dll" />
   </ItemGroup>
 </Project>

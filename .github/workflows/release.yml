@@ -81,6 +81,65 @@ jobs:
             if (Test-Path -LiteralPath $noticePath) { Copy-Item -LiteralPath $noticePath -Destination $privateRuntime.FullName }
           }
 
+          # SimConnect's managed C++ wrapper requires the current x64 VC++
+          # runtime. Bundle Microsoft's redistributable so clean PCs work too.
+          New-Item -ItemType Directory -Force release-staging/publish/prerequisites | Out-Null
+          Invoke-WebRequest `
+            -Uri 'https://aka.ms/vs/17/release/vc_redist.x64.exe' `
+            -OutFile release-staging/publish/prerequisites/VC_redist.x64.exe
+
+      - name: Smoke-test packaged bridge and cockpit artwork
+        shell: pwsh
+        run: |
+          $publish = (Resolve-Path release-staging/publish).Path
+          $bridge = Join-Path $publish 'bridge'
+          foreach ($required in @(
+            'A320Boards.Bridge.dll',
+            'Microsoft.FlightSimulator.SimConnect.dll',
+            'SimConnect.dll',
+            'web/index.html'
+          )) {
+            if (-not (Test-Path -LiteralPath (Join-Path $bridge $required) -PathType Leaf)) {
+              throw "Required packaged file is missing: $required"
+            }
+          }
+          if (Test-Path -LiteralPath (Join-Path $bridge 'lib/SimConnect.dll')) {
+            throw 'Native SimConnect.dll was packaged in bridge/lib instead of beside the bridge assembly.'
+          }
+
+          $layout = Get-ChildItem (Join-Path $bridge 'web/assets') -Filter 'cockpit-layout-*.svg' -File
+          $background = Get-ChildItem (Join-Path $bridge 'web/assets') -Filter 'airport-background-*.jpg' -File
+          if ($layout.Count -ne 1 -or $background.Count -ne 1) {
+            throw "Cockpit web artwork is incomplete (layouts=$($layout.Count), backgrounds=$($background.Count))."
+          }
+
+          $stdout = Join-Path $env:RUNNER_TEMP 'bridge-smoke.stdout.log'
+          $stderr = Join-Path $env:RUNNER_TEMP 'bridge-smoke.stderr.log'
+          $dotnet = Join-Path $publish 'runtime/dotnet.exe'
+          $process = Start-Process -FilePath $dotnet `
+            -ArgumentList @('exec', (Join-Path $bridge 'A320Boards.Bridge.dll'), '--no-browser', '--read-only', '--probe-seconds', '30', '--port', '8399') `
+            -WorkingDirectory $publish -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru -WindowStyle Hidden
+          try {
+            $ready = $false
+            for ($attempt = 0; $attempt -lt 30; $attempt++) {
+              if ($process.HasExited) { break }
+              try {
+                $health = Invoke-RestMethod 'http://127.0.0.1:8399/health' -TimeoutSec 1
+                if ($health.ok) { $ready = $true; break }
+              } catch {}
+              Start-Sleep -Milliseconds 200
+            }
+            if (-not $ready) {
+              throw "Packaged bridge did not become healthy.`nSTDOUT:`n$(Get-Content $stdout -Raw -ErrorAction SilentlyContinue)`nSTDERR:`n$(Get-Content $stderr -Raw -ErrorAction SilentlyContinue)"
+            }
+            $layoutResponse = Invoke-WebRequest "http://127.0.0.1:8399/assets/$($layout.Name)" -TimeoutSec 5 -UseBasicParsing
+            $backgroundResponse = Invoke-WebRequest "http://127.0.0.1:8399/assets/$($background.Name)" -TimeoutSec 5 -UseBasicParsing
+            if ($layoutResponse.StatusCode -ne 200 -or $layoutResponse.Content.Length -lt 1000) { throw 'Packaged cockpit SVG could not be served.' }
+            if ($backgroundResponse.StatusCode -ne 200 -or $backgroundResponse.RawContentLength -lt 1000) { throw 'Packaged cockpit background could not be served.' }
+          } finally {
+            if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+          }
+
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --no-progress --yes
