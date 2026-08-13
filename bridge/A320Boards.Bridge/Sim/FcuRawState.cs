@@ -118,5 +118,43 @@ namespace A320Boards.Bridge.Sim
         public double FlightControlsFac1Switch;
         public double FlightControlsFac1Lower;
         public double FlightControlsFac1Upper;
+
+        public double ZoneTwoEvacCaptPurser;
+        public double ZoneTwoEvacCommand;
+        public double ZoneTwoEvacCommandUpper;
+        public double ZoneTwoEvacCommandLower;
+        public double ZoneTwoGen1Line;
+        public double ZoneTwoGen1LineUpper;
+        public double ZoneTwoGen1LineLower;
+        public double ZoneTwoEmergencyGeneratorFault;
+        public double ZoneTwoGpwsTerr;
+        public double ZoneTwoGpwsTerrUpper;
+        public double ZoneTwoGpwsTerrLower;
+        public double ZoneTwoGpwsSys;
+        public double ZoneTwoGpwsSysUpper;
+        public double ZoneTwoGpwsSysLower;
+        public double ZoneTwoGpwsGsMode;
+        public double ZoneTwoGpwsGsModeLower;
+        public double ZoneTwoGpwsFlapMode;
+        public double ZoneTwoGpwsFlapModeLower;
+        public double ZoneTwoGpwsLdgFlap3;
+        public double ZoneTwoGpwsLdgFlap3Lower;
+        public double ZoneTwoRecorderGroundControl;
+        public double ZoneTwoRecorderGroundControlLower;
+        public double ZoneTwoOxygenPassengerUpper;
+        public double ZoneTwoOxygenCrew;
+        public double ZoneTwoOxygenCrewLower;
+        public double ZoneTwoOxygenHighAlt;
+        public double ZoneTwoOxygenHighAltLower;
+        public double ZoneTwoCallsEmergency;
+        public double ZoneTwoCallsEmergencyUpper;
+        public double ZoneTwoCallsEmergencyLower;
+        public double ZoneTwoWiperCaptain;
+        public double ZoneTwoEvacCommandCover;
+        public double ZoneTwoEmergencyGeneratorTestCover;
+        public double ZoneTwoRatManualOnCover;
+        public double ZoneTwoOxygenHighAltCover;
+        public double ZoneTwoOxygenMaskManualOnCover;
+        public double ZoneTwoCallsEmergencyCover;
     }
 }

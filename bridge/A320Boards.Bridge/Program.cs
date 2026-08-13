@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -21,7 +20,7 @@ namespace A320Boards.Bridge
             if (!isFirstInstance)
             {
                 Console.WriteLine("Fenix A320 Remote Cockpit is already running.");
-                OpenBrowser("http://localhost:8380/");
+                Console.WriteLine("Open http://localhost:8380/ in a browser.");
                 return;
             }
 
@@ -33,7 +32,6 @@ namespace A320Boards.Bridge
             var readOnly = Array.Exists(args, argument => argument == "--read-only");
             var probeIndex = Array.IndexOf(args, "--probe-seconds");
             var portIndex = Array.IndexOf(args, "--port");
-            var noBrowser = Array.Exists(args, argument => argument == "--no-browser");
             if (probeIndex >= 0 && probeIndex + 1 < args.Length)
             {
                 int.TryParse(args[probeIndex + 1], out probeSeconds);
@@ -52,10 +50,6 @@ namespace A320Boards.Bridge
                 {
                     var localUrl = "http://localhost:" + port + "/";
                     PrintConnectionInformation(port, localUrl);
-                    if (!noBrowser)
-                    {
-                        OpenBrowser(localUrl);
-                    }
                 }
                 var reconnect = true;
                 while (reconnect)
@@ -118,16 +112,5 @@ namespace A320Boards.Bridge
             Console.WriteLine(new string('-', 78));
         }
 
-        private static void OpenBrowser(string url)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-            }
-            catch (Exception exception)
-            {
-                Console.Error.WriteLine("Could not open the browser: " + exception.Message);
-            }
-        }
     }
 }

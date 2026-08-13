@@ -1,16 +1,16 @@
 {
   "name": "fenix-a320-remote-cockpit",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "PolyForm-Noncommercial-1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "bridge:build": "powershell -NoProfile -ExecutionPolicy Bypass -File bridge/A320Boards.Bridge/build-with-roslyn.ps1",
-    "bridge:start:readonly": "dotnet exec bridge/A320Boards.Bridge/bin/Debug/net8.0/A320Boards.Bridge.exe --read-only",
-    "bridge:start": "dotnet exec bridge/A320Boards.Bridge/bin/Debug/net8.0/A320Boards.Bridge.exe"
+    "bridge:build": "npm run build && powershell -NoProfile -ExecutionPolicy Bypass -File bridge/A320Boards.Bridge/build-with-roslyn.ps1",
+    "bridge:start:readonly": "dotnet exec bridge/A320Boards.Bridge/bin/Debug/net8.0/A320Boards.Bridge.dll --read-only",
+    "bridge:start": "dotnet exec bridge/A320Boards.Bridge/bin/Debug/net8.0/A320Boards.Bridge.dll"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

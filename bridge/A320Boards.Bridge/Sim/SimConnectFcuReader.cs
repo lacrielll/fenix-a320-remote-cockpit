@@ -104,6 +104,10 @@ namespace A320Boards.Bridge.Sim
                     IntPtr.Zero,
                     0,
                     null,
+                    // Use the default local SimConnect configuration. Passing
+                    // SIMCONNECT_OPEN_CONFIGINDEX_LOCAL (uint.MaxValue) makes
+                    // the installed managed SimConnect wrapper fail here with
+                    // E_FAIL before it can establish the transport.
                     0);
 
                 _simConnect.OnRecvOpen += OnOpen;
@@ -392,6 +396,44 @@ namespace A320Boards.Bridge.Sim
             AddLVar(sender, "S_OH_FLT_CTL_FAC_1");
             AddLVar(sender, "I_OH_FLT_CTL_FAC_1_L");
             AddLVar(sender, "I_OH_FLT_CTL_FAC_1_U");
+
+            AddLVar(sender, "S_OH_EVAC_CAPT_PURSER");
+            AddLVar(sender, "S_OH_EVAC_COMMAND");
+            AddLVar(sender, "I_OH_EVAC_COMMAND_U");
+            AddLVar(sender, "I_OH_EVAC_COMMAND_L");
+            AddLVar(sender, "S_OH_ELEC_GEN1_LINE");
+            AddLVar(sender, "I_OH_ELEC_GEN1_LINE_U");
+            AddLVar(sender, "I_OH_ELEC_GEN1_LINE_L");
+            AddLVar(sender, "I_OH_ELEC_EMERG_GEN_FAULT");
+            AddLVar(sender, "S_OH_GPWS_TERR");
+            AddLVar(sender, "I_OH_GPWS_TERR_U");
+            AddLVar(sender, "I_OH_GPWS_TERR_L");
+            AddLVar(sender, "S_OH_GPWS_SYS");
+            AddLVar(sender, "I_OH_GPWS_SYS_U");
+            AddLVar(sender, "I_OH_GPWS_SYS_L");
+            AddLVar(sender, "S_OH_GPWS_GS_MODE");
+            AddLVar(sender, "I_OH_GPWS_GS_MODE_L");
+            AddLVar(sender, "S_OH_GPWS_FLAP_MODE");
+            AddLVar(sender, "I_OH_GPWS_FLAP_MODE_L");
+            AddLVar(sender, "S_OH_GPWS_LDG_FLAP3");
+            AddLVar(sender, "I_OH_GPWS_LDG_FLAP3_L");
+            AddLVar(sender, "S_OH_RCRD_GND_CTL");
+            AddLVar(sender, "I_OH_RCRD_GND_CTL_L");
+            AddLVar(sender, "I_OH_OXYGEN_PASSENGER_U");
+            AddLVar(sender, "S_OH_OXYGEN_CREW_OXYGEN");
+            AddLVar(sender, "I_OH_OXYGEN_CREW_OXYGEN_L");
+            AddLVar(sender, "S_OH_OXYGEN_HIGH_ALT");
+            AddLVar(sender, "I_OH_OXYGEN_HIGH_ALT_L");
+            AddLVar(sender, "S_OH_CALLS_EMER");
+            AddLVar(sender, "I_OH_CALLS_EMER_U");
+            AddLVar(sender, "I_OH_CALLS_EMER_L");
+            AddLVar(sender, "S_MISC_WIPER_CAPT");
+            AddLVar(sender, "S_OH_EVAC_COMMAND_Cover");
+            AddLVar(sender, "S_OH_ELEC_EMER_GEN_TEST_Cover");
+            AddLVar(sender, "S_OH_ELEC_EMER_GEN_MAN_ON_Cover");
+            AddLVar(sender, "S_OH_OXYGEN_HIGH_ALT_Cover");
+            AddLVar(sender, "S_OH_OXYGEN_MASK_MAN_ON_Cover");
+            AddLVar(sender, "S_OH_CALLS_EMER_Cover");
         }
 
         private static void AddLVar(SimConnect sender, string name)
@@ -568,7 +610,44 @@ namespace A320Boards.Bridge.Sim
                    left.FlightControlsSec1Upper == right.FlightControlsSec1Upper &&
                    left.FlightControlsFac1Switch == right.FlightControlsFac1Switch &&
                    left.FlightControlsFac1Lower == right.FlightControlsFac1Lower &&
-                   left.FlightControlsFac1Upper == right.FlightControlsFac1Upper;
+                   left.FlightControlsFac1Upper == right.FlightControlsFac1Upper &&
+                   left.ZoneTwoEvacCaptPurser == right.ZoneTwoEvacCaptPurser &&
+                   left.ZoneTwoEvacCommand == right.ZoneTwoEvacCommand &&
+                   left.ZoneTwoEvacCommandUpper == right.ZoneTwoEvacCommandUpper &&
+                   left.ZoneTwoEvacCommandLower == right.ZoneTwoEvacCommandLower &&
+                   left.ZoneTwoGen1Line == right.ZoneTwoGen1Line &&
+                   left.ZoneTwoGen1LineUpper == right.ZoneTwoGen1LineUpper &&
+                   left.ZoneTwoGen1LineLower == right.ZoneTwoGen1LineLower &&
+                   left.ZoneTwoEmergencyGeneratorFault == right.ZoneTwoEmergencyGeneratorFault &&
+                   left.ZoneTwoGpwsTerr == right.ZoneTwoGpwsTerr &&
+                   left.ZoneTwoGpwsTerrUpper == right.ZoneTwoGpwsTerrUpper &&
+                   left.ZoneTwoGpwsTerrLower == right.ZoneTwoGpwsTerrLower &&
+                   left.ZoneTwoGpwsSys == right.ZoneTwoGpwsSys &&
+                   left.ZoneTwoGpwsSysUpper == right.ZoneTwoGpwsSysUpper &&
+                   left.ZoneTwoGpwsSysLower == right.ZoneTwoGpwsSysLower &&
+                   left.ZoneTwoGpwsGsMode == right.ZoneTwoGpwsGsMode &&
+                   left.ZoneTwoGpwsGsModeLower == right.ZoneTwoGpwsGsModeLower &&
+                   left.ZoneTwoGpwsFlapMode == right.ZoneTwoGpwsFlapMode &&
+                   left.ZoneTwoGpwsFlapModeLower == right.ZoneTwoGpwsFlapModeLower &&
+                   left.ZoneTwoGpwsLdgFlap3 == right.ZoneTwoGpwsLdgFlap3 &&
+                   left.ZoneTwoGpwsLdgFlap3Lower == right.ZoneTwoGpwsLdgFlap3Lower &&
+                   left.ZoneTwoRecorderGroundControl == right.ZoneTwoRecorderGroundControl &&
+                   left.ZoneTwoRecorderGroundControlLower == right.ZoneTwoRecorderGroundControlLower &&
+                   left.ZoneTwoOxygenPassengerUpper == right.ZoneTwoOxygenPassengerUpper &&
+                   left.ZoneTwoOxygenCrew == right.ZoneTwoOxygenCrew &&
+                   left.ZoneTwoOxygenCrewLower == right.ZoneTwoOxygenCrewLower &&
+                   left.ZoneTwoOxygenHighAlt == right.ZoneTwoOxygenHighAlt &&
+                   left.ZoneTwoOxygenHighAltLower == right.ZoneTwoOxygenHighAltLower &&
+                   left.ZoneTwoCallsEmergency == right.ZoneTwoCallsEmergency &&
+                   left.ZoneTwoCallsEmergencyUpper == right.ZoneTwoCallsEmergencyUpper &&
+                   left.ZoneTwoCallsEmergencyLower == right.ZoneTwoCallsEmergencyLower &&
+                   left.ZoneTwoWiperCaptain == right.ZoneTwoWiperCaptain &&
+                   left.ZoneTwoEvacCommandCover == right.ZoneTwoEvacCommandCover &&
+                   left.ZoneTwoEmergencyGeneratorTestCover == right.ZoneTwoEmergencyGeneratorTestCover &&
+                   left.ZoneTwoRatManualOnCover == right.ZoneTwoRatManualOnCover &&
+                   left.ZoneTwoOxygenHighAltCover == right.ZoneTwoOxygenHighAltCover &&
+                   left.ZoneTwoOxygenMaskManualOnCover == right.ZoneTwoOxygenMaskManualOnCover &&
+                   left.ZoneTwoCallsEmergencyCover == right.ZoneTwoCallsEmergencyCover;
         }
 
         private static void PrintState(FcuRawState state)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace A320Boards.Bridge.Protocol
 {
@@ -170,6 +171,7 @@ namespace A320Boards.Bridge.Protocol
                 LowerLight = Math.Abs(lower) >= 0.5
             };
         }
+
     }
 
     internal sealed class AdirsState
@@ -185,6 +187,7 @@ namespace A320Boards.Bridge.Protocol
         public KorryState CockpitDoorVideo { get; set; } = new KorryState();
         public AdirsState Adirs { get; set; } = new AdirsState();
         public FlightControlsState FlightControls { get; set; } = new FlightControlsState();
+        public ZoneTwoState ZoneTwo { get; set; } = new ZoneTwoState();
 
         public static OverheadState FromRaw(Sim.FcuRawState raw)
         {
@@ -224,13 +227,67 @@ namespace A320Boards.Bridge.Protocol
                     Elac1 = KorryState.FromSwitchAndIndicators(raw.FlightControlsElac1Switch, raw.FlightControlsElac1Lower, raw.FlightControlsElac1Upper),
                     Sec1 = KorryState.FromSwitchAndIndicators(raw.FlightControlsSec1Switch, raw.FlightControlsSec1Lower, raw.FlightControlsSec1Upper),
                     Fac1 = KorryState.FromSwitchAndIndicators(raw.FlightControlsFac1Switch, raw.FlightControlsFac1Lower, raw.FlightControlsFac1Upper)
-                }
+                },
+                ZoneTwo = ZoneTwoState.FromRaw(raw)
             };
         }
 
         private static int ClampSelector(double value)
         {
             return Math.Clamp((int)Math.Round(value), 0, 2);
+        }
+    }
+
+    internal sealed class ZoneTwoState
+    {
+        public bool EvacCaptPurser { get; set; }
+        public KorryState EvacCommand { get; set; } = new KorryState();
+        public KorryState Gen1Line { get; set; } = new KorryState();
+        public bool EmergencyGeneratorFault { get; set; }
+        public Dictionary<string, KorryState> Gpws { get; set; } = new Dictionary<string, KorryState>();
+        public KorryState RecorderGroundControl { get; set; } = new KorryState();
+        public bool OxygenPassengerUpper { get; set; }
+        public KorryState OxygenCrew { get; set; } = new KorryState();
+        public KorryState OxygenHighAlt { get; set; } = new KorryState();
+        public KorryState CallsEmergency { get; set; } = new KorryState();
+        public int WiperCaptain { get; set; }
+        public Dictionary<string, bool> Covers { get; set; } = new Dictionary<string, bool>();
+
+        public static ZoneTwoState FromRaw(Sim.FcuRawState raw)
+        {
+            return new ZoneTwoState
+            {
+                // Fenix encodes the upper CAPT & PURS position as 0 and the
+                // lower CAPT-only position as 1. The browser protocol exposes
+                // the semantic state instead: true means CAPT & PURS.
+                EvacCaptPurser = Math.Abs(raw.ZoneTwoEvacCaptPurser) < .5,
+                EvacCommand = KorryState.FromSwitchAndIndicators(raw.ZoneTwoEvacCommand, raw.ZoneTwoEvacCommandLower, raw.ZoneTwoEvacCommandUpper),
+                Gen1Line = KorryState.FromSwitchAndIndicators(raw.ZoneTwoGen1Line, raw.ZoneTwoGen1LineLower, raw.ZoneTwoGen1LineUpper),
+                EmergencyGeneratorFault = Math.Abs(raw.ZoneTwoEmergencyGeneratorFault) >= .5,
+                Gpws = new Dictionary<string, KorryState>
+                {
+                    ["terr"] = KorryState.FromSwitchAndIndicators(raw.ZoneTwoGpwsTerr, raw.ZoneTwoGpwsTerrLower, raw.ZoneTwoGpwsTerrUpper),
+                    ["sys"] = KorryState.FromSwitchAndIndicators(raw.ZoneTwoGpwsSys, raw.ZoneTwoGpwsSysLower, raw.ZoneTwoGpwsSysUpper),
+                    ["gsMode"] = KorryState.FromSwitchAndIndicators(raw.ZoneTwoGpwsGsMode, raw.ZoneTwoGpwsGsModeLower, 0),
+                    ["flapMode"] = KorryState.FromSwitchAndIndicators(raw.ZoneTwoGpwsFlapMode, raw.ZoneTwoGpwsFlapModeLower, 0),
+                    ["ldgFlap3"] = KorryState.FromSwitchAndIndicators(raw.ZoneTwoGpwsLdgFlap3, raw.ZoneTwoGpwsLdgFlap3Lower, 0)
+                },
+                RecorderGroundControl = KorryState.FromSwitchAndIndicators(raw.ZoneTwoRecorderGroundControl, raw.ZoneTwoRecorderGroundControlLower, 0),
+                OxygenPassengerUpper = Math.Abs(raw.ZoneTwoOxygenPassengerUpper) >= .5,
+                OxygenCrew = KorryState.FromSwitchAndIndicators(raw.ZoneTwoOxygenCrew, raw.ZoneTwoOxygenCrewLower, 0),
+                OxygenHighAlt = KorryState.FromSwitchAndIndicators(raw.ZoneTwoOxygenHighAlt, raw.ZoneTwoOxygenHighAltLower, 0),
+                CallsEmergency = KorryState.FromSwitchAndIndicators(raw.ZoneTwoCallsEmergency, raw.ZoneTwoCallsEmergencyLower, raw.ZoneTwoCallsEmergencyUpper),
+                WiperCaptain = Math.Clamp((int)Math.Round(raw.ZoneTwoWiperCaptain), 0, 2),
+                Covers = new Dictionary<string, bool>
+                {
+                    ["evacCommand"] = Math.Abs(raw.ZoneTwoEvacCommandCover) >= .5,
+                    ["emergencyGeneratorTest"] = Math.Abs(raw.ZoneTwoEmergencyGeneratorTestCover) >= .5,
+                    ["ratManualOn"] = Math.Abs(raw.ZoneTwoRatManualOnCover) >= .5,
+                    ["oxygenHighAlt"] = Math.Abs(raw.ZoneTwoOxygenHighAltCover) >= .5,
+                    ["oxygenMaskManualOn"] = Math.Abs(raw.ZoneTwoOxygenMaskManualOnCover) >= .5,
+                    ["callsEmergency"] = Math.Abs(raw.ZoneTwoCallsEmergencyCover) >= .5
+                }
+            };
         }
     }
 

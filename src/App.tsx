@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { CockpitOverview, type CockpitPanelTarget } from './components/CockpitOverview'
 import { EfisPanel } from './components/EfisPanel'
@@ -6,6 +6,11 @@ import { FcuPanel } from './components/FcuPanel'
 import { OverheadPanel, type OverheadZone } from './components/OverheadPanel'
 import { useFcuBridge } from './fcuBridge'
 import type { EfisState, FcuState, OverheadState } from './types'
+
+const StableCockpitOverview = memo(CockpitOverview)
+const StableEfisPanel = memo(EfisPanel)
+const StableFcuPanel = memo(FcuPanel)
+const StableOverheadPanel = memo(OverheadPanel)
 
 const initialFcu: FcuState = {
   powered: false, speed: 100, heading: 0, altitude: 100, verticalSpeed: 0,
@@ -42,6 +47,48 @@ const initialOverhead: OverheadState = {
     sec1: { ...darkKorry },
     fac1: { ...darkKorry },
   },
+  zoneTwo: {
+    evacCaptPurser: true,
+    evacCommand: { ...darkKorry },
+    gen1Line: { ...darkKorry },
+    emergencyGeneratorFault: false,
+    gpws: { terr: { ...darkKorry }, sys: { ...darkKorry }, gsMode: { ...darkKorry }, flapMode: { ...darkKorry }, ldgFlap3: { ...darkKorry } },
+    recorderGroundControl: { ...darkKorry },
+    oxygenPassengerUpper: false,
+    oxygenCrew: { ...darkKorry },
+    oxygenHighAlt: { ...darkKorry },
+    callsEmergency: { ...darkKorry },
+    wiperCaptain: 0,
+    covers: { evacCommand: false, emergencyGeneratorTest: false, ratManualOn: false, oxygenHighAlt: false, oxygenMaskManualOn: false, callsEmergency: false },
+  },
+}
+
+type PanelPage = 'cockpit' | 'overhead' | 'fcu' | 'efisCaptain' | 'efisFirstOfficer'
+type DetailPage = Exclude<PanelPage, 'cockpit'>
+type DetailKind = 'overhead' | 'fcu' | 'efis'
+
+type PersistentDetailPageProps = {
+  page: DetailPage
+  activePage: PanelPage
+  kind: DetailKind
+  isReturning: boolean
+  frameClassName?: string
+  children: ReactNode
+}
+
+function PersistentDetailPage({ page, activePage, kind, isReturning, frameClassName = '', children }: PersistentDetailPageProps) {
+  const active = activePage === page
+  return <section
+    className={`cockpit-page cockpit-page-detail cockpit-detail-layer cockpit-page-${kind} cockpit-detail-${page} ${active ? 'is-active' : ''} ${active && isReturning ? 'is-closing' : ''}`}
+    aria-hidden={!active}
+    inert={!active || isReturning}
+    data-panel-page={page}
+  >
+    <div className={`single-panel-detail-stage is-${kind}`}>
+      <div className="stage-light" />
+      <div className={`single-panel-detail-frame ${frameClassName}`}>{children}</div>
+    </div>
+  </section>
 }
 
 export function App() {
@@ -53,7 +100,6 @@ export function App() {
       return false
     }
   })
-  type PanelPage = 'cockpit' | 'overhead' | 'fcu' | 'efisCaptain' | 'efisFirstOfficer'
   const overheadZoneFromHash = (): OverheadZone | null => {
     const match = window.location.hash.match(/^#overhead-zone-([1-9])$/)
     return match ? Number(match[1]) as OverheadZone : null
@@ -91,7 +137,7 @@ export function App() {
     }
   }, [tabletMode])
 
-  const openPanelPage = (page: PanelPage) => {
+  const openPanelPage = useCallback((page: PanelPage) => {
     if (panelPage === page && !(page === 'overhead' && overheadZone !== null)) return
     const hashByPage: Record<PanelPage, string> = {
       cockpit: 'cockpit',
@@ -100,25 +146,28 @@ export function App() {
       efisCaptain: 'efis-captain',
       efisFirstOfficer: 'efis-first-officer',
     }
+    setPanelPage(page)
+    if (page !== 'overhead') setOverheadZone(null)
     window.location.hash = hashByPage[page]
-  }
+  }, [overheadZone, panelPage])
 
-  const openCockpitPanel = (target: CockpitPanelTarget) => {
+  const openCockpitPanel = useCallback((target: CockpitPanelTarget) => {
     openPanelPage(target === 'fcu' ? 'fcu' : target === 'captain' ? 'efisCaptain' : 'efisFirstOfficer')
-  }
+  }, [openPanelPage])
 
-  const openOverheadZone = (zone: OverheadZone) => {
+  const openOverheadZone = useCallback((zone: OverheadZone) => {
+    setPanelPage('overhead')
+    setOverheadZone(zone)
     window.location.hash = `overhead-zone-${zone}`
-  }
+  }, [])
 
-  const returnToCockpit = () => {
+  const returnToCockpit = useCallback(() => {
     if (isReturningToCockpit) return
     setIsReturningToCockpit(true)
-    returnTimer.current = window.setTimeout(() => openPanelPage('cockpit'), 560)
-  }
+    returnTimer.current = window.setTimeout(() => openPanelPage('cockpit'), 460)
+  }, [isReturningToCockpit, openPanelPage])
 
-  const showOverview = panelPage === 'cockpit' || isReturningToCockpit
-  const showDetail = panelPage !== 'cockpit'
+  const detailOpen = panelPage !== 'cockpit'
 
   return <main className={`app-shell ${panelPage === 'cockpit' ? 'is-overview-page' : 'is-detail-page'} ${tabletMode ? 'is-tablet-mode' : ''} ${isReturningToCockpit ? `is-returning-to-cockpit return-from-${panelPage}` : ''}`}>
     <button
@@ -131,30 +180,33 @@ export function App() {
       <span className="tablet-mode-lamp" aria-hidden="true" />
       <span>TABLET MODE</span>
     </button>
-    {showOverview && <div className={`cockpit-page cockpit-page-overview ${isReturningToCockpit ? 'cockpit-page-return-preview' : ''}`}>
-        <div className="scene-head">
-          <div><span className="eyebrow">A320 · FLIGHT DECK</span><h1>Cockpit overview</h1></div>
-          <button className="view-picker"><span className="view-icon">◉</span><span><small>VIEWPOINT</small>Captain seat</span><ChevronDown /></button>
-        </div>
-        <div className="cockpit-overview-stage">
-          <div className="stage-light" />
-          <CockpitOverview fcu={fcu} efisCaptain={efis} efisFirstOfficer={efisFirstOfficer} send={send} onOpenPanel={openCockpitPanel} onOpenOverhead={openOverheadZone} />
-        </div>
-      </div>}
-    {showDetail && <div className={`cockpit-page cockpit-page-detail ${panelPage === 'fcu' ? 'cockpit-page-fcu' : panelPage === 'overhead' ? 'cockpit-page-overhead' : 'cockpit-page-efis'}`}>
-        <button className="detail-back-button" type="button" onClick={returnToCockpit} disabled={isReturningToCockpit} aria-label="Back to cockpit overview"><span aria-hidden="true">←</span><span>COCKPIT</span></button>
-        <div className={`single-panel-detail-stage ${panelPage === 'overhead' ? 'is-overhead' : panelPage === 'fcu' ? 'is-fcu' : 'is-efis'}`}>
-          <div className="stage-light" />
-          <div className={`single-panel-detail-frame ${overheadZone ? `overhead-zone-frame-${overheadZone}` : ''}`}>
-            {panelPage === 'overhead'
-              ? <OverheadPanel focusZone={overheadZone ?? undefined} state={overhead} send={send} />
-              : panelPage === 'fcu'
-              ? <FcuPanel state={fcu} send={send} />
-              : panelPage === 'efisCaptain'
-                ? <EfisPanel state={efis} send={send} />
-                : <EfisPanel state={efisFirstOfficer} send={send} side="firstOfficer" mirrored />}
-          </div>
-        </div>
-      </div>}
+    <div className={`cockpit-page cockpit-page-overview ${detailOpen ? 'is-covered' : ''}`} inert={detailOpen} aria-hidden={detailOpen}>
+      <div className="scene-head">
+        <div><span className="eyebrow">A320 · FLIGHT DECK</span><h1>Cockpit overview</h1></div>
+        <button className="view-picker"><span className="view-icon">◉</span><span><small>VIEWPOINT</small>Captain seat</span><ChevronDown /></button>
+      </div>
+      <div className="cockpit-overview-stage">
+        <div className="stage-light" />
+        <StableCockpitOverview fcu={fcu} efisCaptain={efis} efisFirstOfficer={efisFirstOfficer} send={send} onOpenPanel={openCockpitPanel} onOpenOverhead={openOverheadZone} />
+      </div>
+    </div>
+
+    <div className={`cockpit-detail-backdrop ${detailOpen ? isReturningToCockpit ? 'is-closing' : 'is-active' : ''}`} aria-hidden="true" />
+    <div className="cockpit-detail-stack" aria-live="off">
+      <PersistentDetailPage page="overhead" activePage={panelPage} kind="overhead" isReturning={isReturningToCockpit} frameClassName={overheadZone ? `overhead-zone-frame-${overheadZone}` : ''}>
+        <StableOverheadPanel focusZone={overheadZone ?? undefined} state={overhead} send={send} />
+      </PersistentDetailPage>
+      <PersistentDetailPage page="fcu" activePage={panelPage} kind="fcu" isReturning={isReturningToCockpit}>
+        <StableFcuPanel state={fcu} send={send} />
+      </PersistentDetailPage>
+      <PersistentDetailPage page="efisCaptain" activePage={panelPage} kind="efis" isReturning={isReturningToCockpit}>
+        <StableEfisPanel state={efis} send={send} />
+      </PersistentDetailPage>
+      <PersistentDetailPage page="efisFirstOfficer" activePage={panelPage} kind="efis" isReturning={isReturningToCockpit}>
+        <StableEfisPanel state={efisFirstOfficer} send={send} side="firstOfficer" mirrored />
+      </PersistentDetailPage>
+    </div>
+
+    <button className={`detail-back-button ${detailOpen ? 'is-visible' : ''}`} type="button" onClick={returnToCockpit} disabled={!detailOpen || isReturningToCockpit} aria-hidden={!detailOpen} tabIndex={detailOpen ? 0 : -1} aria-label="Back to cockpit overview"><span aria-hidden="true">←</span><span>COCKPIT</span></button>
   </main>
 }

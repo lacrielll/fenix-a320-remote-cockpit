@@ -1,0 +1,20 @@
+<svg width="88" height="92" viewBox="0 0 88 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_180_1797)">
+<rect x="2" y="2" width="84" height="6" fill="#3A3A3A"/>
+<rect x="5" y="2" width="78" height="4" fill="#AFAFAF"/>
+<rect x="5" y="2" width="4" height="4" fill="#202020"/>
+<rect x="79" y="2" width="4" height="4" fill="#202020"/>
+<rect x="2" y="8" width="84" height="41" stroke="#3A3A3A"/>
+<rect x="1.5" y="7.5" width="42" height="42" fill="#DADADA" fill-opacity="0.05" stroke="#3A3A3A"/>
+<rect x="44.5" y="7.5" width="42" height="42" fill="#DADADA" fill-opacity="0.05" stroke="#3A3A3A"/>
+<rect x="2" y="49" width="84" height="41" stroke="#3A3A3A"/>
+<rect x="1.5" y="48.5" width="42" height="42" fill="#DADADA" fill-opacity="0.05" stroke="#3A3A3A"/>
+<rect x="44.5" y="48.5" width="42" height="42" fill="#DADADA" fill-opacity="0.05" stroke="#3A3A3A"/>
+</g>
+<rect x="1" y="1" width="86" height="90" stroke="#3A3A3A" stroke-width="2"/>
+<defs>
+<clipPath id="clip0_180_1797">
+<rect x="2" y="2" width="84" height="88" fill="white"/>
+</clipPath>
+</defs>
+</svg>

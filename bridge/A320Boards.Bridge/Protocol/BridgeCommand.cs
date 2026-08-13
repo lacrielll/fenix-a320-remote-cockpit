@@ -9,6 +9,7 @@ namespace A320Boards.Bridge.Protocol
         public string Side { get; set; } = string.Empty;
         public int Direction { get; set; }
         public double Value { get; set; }
+        public bool Open { get; set; }
     }
 
     internal sealed class CommandResult

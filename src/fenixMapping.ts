@@ -46,6 +46,7 @@ export function commandToFenixLVar(command: CockpitCommand): FenixWrite {
     const names = { ir1Mode: 'S_OH_NAV_IR1_MODE', ir2Mode: 'S_OH_NAV_IR2_MODE', ir3Mode: 'S_OH_NAV_IR3_MODE' }
     return { name: names[command.control], operation: 'adjust' }
   }
+  if (command.type === 'overhead.zone2.button' || command.type === 'overhead.zone2.cover' || command.type === 'overhead.zone2.set') return { name: command.control, operation: 'adjust' }
   const side = command.side === 'captain' ? 'EFIS1' : 'EFIS2'
   if (command.type === 'efis.button') {
     const suffix = command.control === 'baroStd' ? 'BARO_STD' : command.control === 'fd' || command.control === 'ls' ? `${command.control.toUpperCase()}_PRESS` : command.control.toUpperCase()

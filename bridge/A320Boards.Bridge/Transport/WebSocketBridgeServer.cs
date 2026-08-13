@@ -261,7 +261,8 @@ namespace A320Boards.Bridge.Transport
                         Control = commandElement.TryGetProperty("control", out var control) ? control.GetString() ?? string.Empty : string.Empty,
                         Side = commandElement.TryGetProperty("side", out var side) ? side.GetString() ?? string.Empty : string.Empty,
                         Direction = commandElement.TryGetProperty("direction", out var direction) ? direction.GetInt32() : 0,
-                        Value = commandElement.TryGetProperty("value", out var value) ? value.GetDouble() : 0
+                        Value = commandElement.TryGetProperty("value", out var value) ? value.GetDouble() : 0,
+                        Open = commandElement.TryGetProperty("open", out var open) && open.GetBoolean()
                     };
 
                     Console.WriteLine(

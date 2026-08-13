@@ -63,6 +63,21 @@ export function useFcuBridge(initialFcu: FcuState, initialEfis: EfisState, initi
   const socketRef = useRef<WebSocket | null>(null)
   const revisionRef = useRef(-1)
   const reconnectTimerRef = useRef<number | undefined>(undefined)
+  const serializedStateRef = useRef<{
+    fcu: string
+    efis: string
+    efisFirstOfficer: string
+    overhead: string
+  } | null>(null)
+  if (serializedStateRef.current === null) {
+    serializedStateRef.current = {
+      fcu: JSON.stringify(initialFcu),
+      efis: JSON.stringify(initialEfis),
+      efisFirstOfficer: JSON.stringify(initialEfis),
+      overhead: JSON.stringify(initialOverhead),
+    }
+  }
+  const serializedState = serializedStateRef.current
 
   useEffect(() => {
     let disposed = false
@@ -84,10 +99,28 @@ export function useFcuBridge(initialFcu: FcuState, initialEfis: EfisState, initi
         if (message.type === 'snapshot') {
           if (message.revision <= revisionRef.current) return
           revisionRef.current = message.revision
-          setFcu(message.state.fcu)
-          setEfis(message.state.efis)
-          setEfisFirstOfficer(message.state.efisFirstOfficer)
-          if (message.state.overhead) setOverhead(message.state.overhead)
+          const nextFcu = JSON.stringify(message.state.fcu)
+          if (serializedState.fcu !== nextFcu) {
+            serializedState.fcu = nextFcu
+            setFcu(message.state.fcu)
+          }
+          const nextEfis = JSON.stringify(message.state.efis)
+          if (serializedState.efis !== nextEfis) {
+            serializedState.efis = nextEfis
+            setEfis(message.state.efis)
+          }
+          const nextFirstOfficerEfis = JSON.stringify(message.state.efisFirstOfficer)
+          if (serializedState.efisFirstOfficer !== nextFirstOfficerEfis) {
+            serializedState.efisFirstOfficer = nextFirstOfficerEfis
+            setEfisFirstOfficer(message.state.efisFirstOfficer)
+          }
+          if (message.state.overhead) {
+            const nextOverhead = JSON.stringify(message.state.overhead)
+            if (serializedState.overhead !== nextOverhead) {
+              serializedState.overhead = nextOverhead
+              setOverhead(message.state.overhead)
+            }
+          }
           setConnected(message.status.simulatorConnected)
           setReady(message.status.simulatorConnected && message.status.mobiFlightVerified)
           return

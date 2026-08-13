@@ -138,6 +138,15 @@ namespace A320Boards.Bridge.Sim
                     case "overhead.set":
                         confirmed = OverheadSet(command, latestState.Value);
                         break;
+                    case "overhead.zone2.button":
+                        confirmed = ZoneTwoButton(command.Control, latestState.Value);
+                        break;
+                    case "overhead.zone2.cover":
+                        confirmed = ZoneTwoCover(command.Control, command.Open, latestState.Value);
+                        break;
+                    case "overhead.zone2.set":
+                        confirmed = ZoneTwoSet(command.Control, command.Value, latestState.Value);
+                        break;
                     default:
                         throw new InvalidOperationException("Unsupported command type: " + command.Type);
                 }
@@ -393,6 +402,127 @@ namespace A320Boards.Bridge.Sim
             PulseFenixMomentary(variable);
             return state => OverheadLowerIndicator(control, state) != baselineLower ||
                             OverheadUpperIndicator(control, state) != baselineUpper;
+        }
+
+        private Func<FcuRawState, bool> ZoneTwoButton(string control, FcuRawState baseline)
+        {
+            var variable = control switch
+            {
+                "evacCommand" => "S_OH_EVAC_COMMAND",
+                "evacHorn" => "S_OH_EVAC_HORN_SHUTOFF",
+                "emergencyGeneratorTest" => "S_OH_ELEC_EMER_GEN_TEST",
+                "gen1Line" => "S_OH_ELEC_GEN1_LINE",
+                "ratManualOn" => "S_OH_ELEC_EMER_GEN_MAN_ON",
+                "gpwsTerr" => "S_OH_GPWS_TERR",
+                "gpwsSys" => "S_OH_GPWS_SYS",
+                "gpwsGsMode" => "S_OH_GPWS_GS_MODE",
+                "gpwsFlapMode" => "S_OH_GPWS_FLAP_MODE",
+                "gpwsLdgFlap3" => "S_OH_GPWS_LDG_FLAP3",
+                "recorderGroundControl" => "S_OH_RCRD_GND_CTL",
+                "cvrErase" => "S_OH_RCRD_ERASE",
+                "cvrTest" => "S_OH_RCRD_TEST",
+                "oxygenHighAlt" => "S_OH_OXYGEN_HIGH_ALT",
+                "oxygenMaskManualOn" => "S_OH_OXYGEN_MASK_MAN_ON",
+                "oxygenCrewSupply" => "S_OH_OXYGEN_CREW_OXYGEN",
+                "callsMech" => "S_OH_CALLS_MECH",
+                "callsAll" => "S_OH_CALLS_ALL",
+                "callsFwd" => "S_OH_CALLS_FWD",
+                "callsAft" => "S_OH_CALLS_AFT",
+                "callsEmergency" => "S_OH_CALLS_EMER",
+                "rainRepellent" => "S_MISC_WIPER_REPELLENT_CAPT",
+                _ => throw new InvalidOperationException("Unknown overhead zone 2 button: " + control)
+            };
+            var before = ZoneTwoObservable(control, baseline);
+            var latching = control == "evacCommand" || control == "gen1Line" ||
+                           control == "gpwsTerr" || control == "gpwsSys" ||
+                           control == "gpwsGsMode" || control == "gpwsFlapMode" ||
+                           control == "gpwsLdgFlap3" || control == "oxygenHighAlt" ||
+                           control == "oxygenCrewSupply" || control == "callsEmergency";
+
+            if (latching)
+            {
+                var target = IsOn(before) ? 0 : 1;
+                WriteAbsolute(variable, target);
+                return state => IsOn(ZoneTwoObservable(control, state)) == (target == 1);
+            }
+
+            // Fenix's own momentary-button template increments the S-variable
+            // once on LeftSingle and once again on LeftRelease. Reproduce both
+            // edges on separate simulator frames; writing 0/1/0 does not click it.
+            ClickCounter(variable);
+            return control == "recorderGroundControl"
+                ? state => ZoneTwoObservable(control, state) != before
+                : _ => true;
+        }
+
+        private Func<FcuRawState, bool> ZoneTwoCover(string control, bool open, FcuRawState baseline)
+        {
+            var variable = control switch
+            {
+                "emergencyGeneratorTest" => "S_OH_ELEC_EMER_GEN_TEST_Cover",
+                "ratManualOn" => "S_OH_ELEC_EMER_GEN_MAN_ON_Cover",
+                "evacCommand" => "S_OH_EVAC_COMMAND_Cover",
+                "oxygenHighAlt" => "S_OH_OXYGEN_HIGH_ALT_Cover",
+                "oxygenMaskManualOn" => "S_OH_OXYGEN_MASK_MAN_ON_Cover",
+                "callsEmergency" => "S_OH_CALLS_EMER_Cover",
+                _ => throw new InvalidOperationException("This zone 2 cover is not exposed by Fenix: " + control)
+            };
+            WriteAbsolute(variable, open ? 1 : 0);
+            return state => IsOn(ZoneTwoCoverValue(control, state)) == open;
+        }
+
+        private Func<FcuRawState, bool> ZoneTwoSet(string control, double rawValue, FcuRawState baseline)
+        {
+            var value = (int)Math.Round(rawValue);
+            if (control == "evacCaptPurser")
+            {
+                value = Math.Clamp(value, 0, 1);
+                var captAndPurser = value == 1;
+                var fenixValue = captAndPurser ? 0 : 1;
+                WriteAbsolute("S_OH_EVAC_CAPT_PURSER", fenixValue);
+                return state => !IsOn(state.ZoneTwoEvacCaptPurser) == captAndPurser;
+            }
+            if (control == "wiperCaptain")
+            {
+                value = Math.Clamp(value, 0, 2);
+                WriteAbsolute("S_MISC_WIPER_CAPT", value);
+                return state => (int)Math.Round(state.ZoneTwoWiperCaptain) == value;
+            }
+            throw new InvalidOperationException("Unknown overhead zone 2 selector: " + control);
+        }
+
+        private static double ZoneTwoObservable(string control, FcuRawState state)
+        {
+            return control switch
+            {
+                "evacCommand" => state.ZoneTwoEvacCommand,
+                "gen1Line" => state.ZoneTwoGen1Line,
+                "gpwsTerr" => state.ZoneTwoGpwsTerr,
+                "gpwsSys" => state.ZoneTwoGpwsSys,
+                "gpwsGsMode" => state.ZoneTwoGpwsGsMode,
+                "gpwsFlapMode" => state.ZoneTwoGpwsFlapMode,
+                "gpwsLdgFlap3" => state.ZoneTwoGpwsLdgFlap3,
+                "recorderGroundControl" => state.ZoneTwoRecorderGroundControl,
+                "oxygenHighAlt" => state.ZoneTwoOxygenHighAlt,
+                "oxygenCrewSupply" => state.ZoneTwoOxygenCrew,
+                "callsEmergency" => state.ZoneTwoCallsEmergency,
+                "rainRepellent" => 0,
+                _ => 0
+            };
+        }
+
+        private static double ZoneTwoCoverValue(string control, FcuRawState state)
+        {
+            return control switch
+            {
+                "emergencyGeneratorTest" => state.ZoneTwoEmergencyGeneratorTestCover,
+                "ratManualOn" => state.ZoneTwoRatManualOnCover,
+                "evacCommand" => state.ZoneTwoEvacCommandCover,
+                "oxygenHighAlt" => state.ZoneTwoOxygenHighAltCover,
+                "oxygenMaskManualOn" => state.ZoneTwoOxygenMaskManualOnCover,
+                "callsEmergency" => state.ZoneTwoCallsEmergencyCover,
+                _ => 0
+            };
         }
 
         private static double FlightControlsSwitch(string control, FcuRawState state)
